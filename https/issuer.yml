@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: letsencrypt
+spec:
+  acme:
+    privateKeySecretRef:
+      name: letsencrypt-key  # must be something unique
+    solvers:
+      - http01:
+          ingress:
+            class: openshift-default
+    server: 'https://acme-v02.api.letsencrypt.org/directory'
+    email: dev@babymri.org

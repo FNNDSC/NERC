@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: figlet-chrisproject-org
+  annotations:
+    cert-manager.io/issuer: letsencrypt
+    acme.cert-manager.io/http01-ingress-class: openshift-default
+spec:
+  ingressClassName: openshift-default
+  tls:
+    - hosts:
+        - figlet.chrisproject.org
+      secretName: figlet-chrisproject-org-letsencrypt
+  rules:
+    - host: figlet.chrisproject.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: figlet-faas
+                port:
+                  number: 8080
