@@ -1,0 +1,16 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: niivue
+  labels:
+    app.kubernetes.io/name: niivue-browser
+spec:
+  to:
+    kind: Service
+    name: niivue-browser
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    destinationCACertificate: ''
+  port:
+    targetPort: http

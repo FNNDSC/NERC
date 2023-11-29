@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: niivue-browser
+  labels:
+    app.kubernetes.io/name: niivue-browser
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: niivue-browser
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: niivue-browser
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/path: '/metrics'
+        prometheus.io/port: '2019'
+    spec:
+      initContainers:
+      - name: download-samples
+        image: ghcr.io/fnndsc/niivue-browser:latest
+        command:
+        - sh
+        - -c
+        - |
+          if [ -e /data/lost+found ]; then
+            rm -rvf /data/lost+found
+          fi
+          if [ -e /data/subject_information.csv ]; then
+            exit 0
+          fi
+          cd /
+          wget -q -O- https://stack.nerc.mghpcc.org:13808/swift/v1/AUTH_2dd3b02b267242d9b28f94a512ea9ede/fnndsc-public/samples/fetal_brain/sample_human_fetus_brain_mri_subplate_surfaces.tar.gz | tar xvz
+        volumeMounts:
+        - name: data
+          mountPath: /data
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 500m
+            memory: 128Mi
+      containers:
+      - name: niivue-browser
+        image: ghcr.io/fnndsc/niivue-browser:latest
+        imagePullPolicy: Always
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 1Gi
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        - name: caddy
+          containerPort: 2019
+          protocol: TCP
+        readinessProbe:
+          httpGet:
+            path: /index.html
+            port: http
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: niivue-browser-data
+      terminationGracePeriodSeconds: 10
