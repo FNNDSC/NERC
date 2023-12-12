@@ -15,7 +15,7 @@ ackee:
   # Custom name for the tracking script of Ackee to avoid getting blocked by browser extensions
   trackerName: tracker
   # Setting CORS headers
-  corsHeaders: ""
+  corsHeaders: "https://chrisproject.org,https://app.chrisproject.org,https://app.fetalmri.org"
 
 ingress:
   # Enable ingress controller resource
@@ -24,8 +24,8 @@ ingress:
 # CPU/Memory resource requests/limits
 resources:
   limits:
-    cpu: 1
-    memory: 1Gi
+    cpu: 500m
+    memory: 256Mi
   requests:
-    cpu: 1
-    memory: 1Gi
+    cpu: 500m
+    memory: 256Mi
