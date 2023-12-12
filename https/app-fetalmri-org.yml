@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-fetalmri-org
+  annotations:
+    cert-manager.io/issuer: letsencrypt
+    acme.cert-manager.io/http01-ingress-class: openshift-default
+spec:
+  ingressClassName: openshift-default
+  tls:
+    - hosts:
+        - app.fetalmri.org
+      secretName: app-fetalmri-org-letsencrypt
+  rules:
+    - host: app.fetalmri.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: app-fetalmri-org
+                port:
+                  number: 8080

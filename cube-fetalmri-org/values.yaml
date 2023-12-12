@@ -1,0 +1,221 @@
+# Global settings
+#####################
+
+global:
+  # storage class to use for persistent volume claims
+  storageClass: "ocs-external-storagecluster-ceph-rbd"
+
+# ChRIS automatic admin account
+#####################
+
+chris_admin:
+  username: fnndsc
+  email: dev@babymri.org
+  # password is not set here. It is stored as a Kubernetes secret.
+
+# ChRIS Backend
+#####################
+cube:
+  image:
+    repository: ghcr.io/fnndsc/cube
+    pullPolicy: IfNotPresent
+    tag: ""
+
+  # Use inter-pod affinity as a workaround for using a ReadWriteOnce PersistentVolumeClaim
+  enablePodAffinityWorkaround: true
+
+  # Configuration
+  #####################
+  config:
+    # smaller values increases responsiveness at the cost of resource usage and possibly concurrency bugs
+    CUBE_CELERY_POLL_INTERVAL: "10.0"
+    # HTTP server security settings
+    DJANGO_ALLOWED_HOSTS: "*"  # IMPORTANT! You must allow "{{ .Release.Name }}-heart:8000"
+    DJANGO_CORS_ALLOW_ALL_ORIGINS: "true"
+    DJANGO_CORS_ALLOWED_ORIGINS: ""
+    DJANGO_SECURE_PROXY_SSL_HEADER: "HTTP_X_FORWARDED_PROTO,https"
+    DJANGO_USE_X_FORWARDED_HOST: "true"
+    AUTH_LDAP: "false"
+
+  # Set of default plugins to register with the coupled pfcon (if .pfcon.enabled)
+  # Plugins which CUBE is hard-coded to depend on should be listed here.
+  # To add plugins for general use, see https://chrisproject.org/docs/tutorials/upload_plugin
+  plugins:
+    - https://cube.chrisproject.org/api/v1/plugins/170/ # pl-dircopy
+    - https://cube.chrisproject.org/api/v1/plugins/81/  # pl-tsdircopy
+    - https://cube.chrisproject.org/api/v1/plugins/10/  # pl-topologicalcopy
+
+  # Ingress
+  #####################
+  ingress: {}
+    ## Use nodePort for ingress
+    # nodePort: "32000"
+    ## optionally, test the nodePort connectivity by providing the hostname to any node of your cluster
+    # nodePortHost: my_hostname
+
+  # Resources
+  #####################
+  # Persistent volume for CUBE files
+  storage:
+    # CUBE's file storage is managed by pfcon's subchart, so leave this as "enabled: false"
+    enabled: false
+
+  # Resources
+  #####################
+  workerMains:
+    ## Resources for the main worker.
+    resources:
+      requests:
+        memory: 8Gi
+        cpu: 2
+      limits:
+        memory: 8Gi
+        cpu: 2
+
+  workerPeriodic:
+    ## Resources for the periodic worker.
+    ## Default values should be okay. Memory request may be further reduced to ~400Mi.
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 250m
+
+  server:
+    workers: 8
+    ## resources for the HTTP server (WSGI).
+    ## Default values should be okay. About 256Mi of memory is needed per idle worker.
+    resources:
+      requests:
+        memory: 4Gi
+        cpu: 2
+      limits:
+        memory: 4Gi
+        cpu: 2
+
+# Database
+#####################
+
+# [SUBCHART] PostgreSQL packaged by Bitnami
+# https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters
+postgresql:
+
+  # no reason to change these values
+  auth:
+    database: "chris"
+    username: "chris"
+
+  architecture: standalone
+
+  primary:
+    # Primary database instance resource requests
+    resources:
+      limits:
+        memory: 1Gi
+        cpu: 1
+      requests:
+        memory: 1Gi
+        cpu: 1
+    persistence:
+      enabled: true
+      size: 8Gi
+
+    # Defer control of security configurations to OpenShift
+    podSecurityContext:
+      enabled: false
+    containerSecurityContext:
+      enabled: false
+  volumePermissions:
+    enabled: false
+  shmVolume:
+    enabled: false
+
+# [SUBCHART] RabbitMQ packaged by Bitnami
+# https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#parameters
+rabbitmq:
+
+  # No reason to change these values.
+  #
+  # Whether or not to set a password for RabbitMQ depends on your threat model.
+  # The RabbitMQ service does not receive ingress traffic, the password appears
+  # here in values.yaml due to limitations of how Helm charts share variables
+  # with subcharts.
+  auth:
+    username: "chris"
+    password: "chris1234"
+
+  persistence:
+    enabled: true
+    size: 1Gi
+
+  # Defer control of security configurations to OpenShift
+  podSecurityContext:
+    enabled: false
+  containerSecurityContext:
+    enabled: false
+  volumePermissions:
+    enabled: false
+
+pfcon:
+  enabled: true
+
+  name: "nerc"
+  description: "New England Research Cloud (in-network, RWO filesystem)"
+  replicaCount: 1
+  podAnnotations: {}
+
+  service:
+    type: ClusterIP
+    port: 5005
+
+  # Storage space for CUBE files should be configured here.
+  # It is recommended to allocate as much space as possible for CUBE files.
+  storage:
+    existingClaim: ""
+    size: 100Gi
+    accessModes: [ "ReadWriteOnce" ]
+
+  pfcon:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+    workers: 2
+    workerTimeout: 3600
+
+    # pfcon configuration
+    # Recommended to keep as-is
+    config:
+      innetwork: true
+      storageEnv: filesystem
+
+  pman:
+    resources:
+      limits:
+        cpu: 250m
+        memory: 640Mi
+      requests:
+        cpu: 250m
+        memory: 640Mi
+
+    workers: 2
+    workerTimeout: 30
+
+    # pman configuration
+    # https://github.com/fnndsc/pman#environment-variables
+    # SECRET_KEY, CONTAINER_ENV, STORAGE_TYPE, VOLUME_NAME, and CONTAINER_USER are handled automaticallY
+    config:
+      JOB_LABELS: chrisproject.org/job=plugininstance
+      ENABLE_HOME_WORKAROUND: "yes"
+      REMOVE_JOBS: "yes"
+      IGNORE_LIMITS: "no"
+      NODE_SELECTOR: "kubernetes.io/hostname=wrk-19"  # DANGER! hard-coded to the node where the RWO volume is mounted
+
+    # Should be disabled on OpenShift.
+    setSecurityContext: false
