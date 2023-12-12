@@ -1,0 +1,31 @@
+image:
+  pullPolicy: Always
+  repository: ghcr.io/jennydaman/ackee
+  tag: clean-build
+
+ackee:
+  # Address to MongoDB for ackee
+  mongodb: mongodb://ackee-db-mongodb:27017/ackee    # <-- see ./mong-values.yaml
+  # Username for the default Ackee user
+  username: fnndsc
+  # Name of the secret containing the password for the default Ackee user
+  passwordSecret: ackee-password             # <-- created manually
+  # Specifies how long a generated token is valid
+  ttl: 3600000
+  # Custom name for the tracking script of Ackee to avoid getting blocked by browser extensions
+  trackerName: tracker
+  # Setting CORS headers
+  corsHeaders: ""
+
+ingress:
+  # Enable ingress controller resource
+  enabled: false
+
+# CPU/Memory resource requests/limits
+resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    cpu: 1
+    memory: 1Gi
