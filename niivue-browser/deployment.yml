@@ -4,6 +4,8 @@ metadata:
   name: niivue-browser
   labels:
     app.kubernetes.io/name: niivue-browser
+  annotations:
+    kubernetes.io/description: "Demo of the niivue-browser project. https://github.com/FNNDSC/niivue-browser"
 spec:
   replicas: 1
   selector:
