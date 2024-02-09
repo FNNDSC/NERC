@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: pfdcm1
+  labels:
+    app.kubernetes.io/name: pfdcm
+    app.kubernetes.io/instance: cube1
+spec:
+  to:
+    kind: Service
+    name: cube1-pfdcm
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    destinationCACertificate: ''
+  port:
+    targetPort: http

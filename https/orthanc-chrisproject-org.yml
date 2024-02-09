@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: orthanc-chrisproject-org
+  annotations:
+    cert-manager.io/issuer: letsencrypt
+    acme.cert-manager.io/http01-ingress-class: openshift-default
+spec:
+  ingressClassName: openshift-default
+  tls:
+    - hosts:
+        - orthanc.chrisproject.org
+      secretName: orthanc-chrisproject-org-letsencrypt
+  rules:
+    - host: orthanc.chrisproject.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cube1-orthanc
+                port:
+                  number: 8042
