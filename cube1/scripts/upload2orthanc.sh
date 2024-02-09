@@ -23,4 +23,4 @@ total="$(wc -l <<< "$files")"
 echo "$files" \
   | tqdm --total=$total --unit=files --desc=Uploading \
   | xargs -I '{}' curl -sfX POST -u "$username:$password" "$url" \
-      -H 'Content-Type: application/dicom' --data-binary @'{}' -o /dev/null
+      -H 'Expect:' -H 'Content-Type: application/dicom' --data-binary @'{}' -o /dev/null
