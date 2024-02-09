@@ -338,9 +338,9 @@ pfdcm:
         memory: 256Mi
     configuration:
       friendlyName: ChRIS pfdcm
-      wadoUriRoot: "https://dicomweb1-hosting-of-medical-image-analysis-platform-dcb83b.apps.shift.nerc.mghpcc.org/dicomweb"
-      qidoRoot: "https://dicomweb1-hosting-of-medical-image-analysis-platform-dcb83b.apps.shift.nerc.mghpcc.org/dicomweb"
-      wadoRoot: "https://dicomweb1-hosting-of-medical-image-analysis-platform-dcb83b.apps.shift.nerc.mghpcc.org/dicomweb"
+      wadoUriRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
+      qidoRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
+      wadoRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
 
 # PACS server
 orthanc:

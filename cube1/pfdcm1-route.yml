@@ -15,3 +15,4 @@ spec:
     destinationCACertificate: ''
   port:
     targetPort: http
+  host: pfdcm1.apps.shift.nerc.mghpcc.org
