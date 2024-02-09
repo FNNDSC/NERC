@@ -1,7 +1,7 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: publictesting
+  name: cube-for-testing-chrisui
   labels:
     app.kubernetes.io/name: public-testing
 spec:
@@ -14,3 +14,4 @@ spec:
     destinationCACertificate: ''
   port:
     targetPort: http
+  host: cube-for-testing-chrisui.apps.shift.nerc.mghpcc.org
