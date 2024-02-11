@@ -1,0 +1,159 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: prune-test-user-accounts-weekly
+  namespace: hosting-of-medical-image-analysis-platform-dcb83b
+  labels: &labels
+    app.kubernetes.io/name: prune-test-user-accounts-weekly
+    app.kubernetes.io/instance: public-testing
+spec:
+  schedule: "@weekly"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  concurrencyPolicy: Forbid
+  timeZone: "America/New_York"
+  jobTemplate:
+    metadata:
+      labels: *labels
+    spec:
+      template:
+        metadata:
+          labels: *labels
+        spec:
+          containers:
+          - name: delete-test-user-accounts
+            image: ghcr.io/fnndsc/cube:5.0.0
+            imagePullPolicy: IfNotPresent
+            command:
+            - python
+            - manage.py
+            - shell
+            - -c
+            # -------------------- START OF SCRIPT --------------------
+            - |
+              import datetime
+              import logging
+
+              import django
+              django.setup()
+
+              from django.contrib.auth.models import User
+              from django.conf import settings
+
+              from feeds.models import Feed
+              from plugininstances.models import PluginInstance
+              from core.storage import connect_storage
+
+
+              SPECIAL_USERS = ['fnndsc', 'chris', 'chrisui', 'testuser']
+              """
+              List of usernames not to delete.
+              """
+              DAYS_AGE_TO_DELETE = 7
+              """
+              Age of accounts to delete in units of days.
+              """
+
+
+              logger = logging.getLogger(__name__)
+
+              storage = connect_storage(settings)
+
+
+              def username_is_not_special(user: User) -> bool:
+                  return user.username not in SPECIAL_USERS
+
+
+              def delete_all_feeds_of(user: User):
+                  for plinst in PluginInstance.objects.filter(plugin__meta__type='fs', owner=user):
+                      feed = plinst.feed
+                      feed.delete()
+                      logger.info(f'Deleted feed (id={feed.id}): {feed.name}')
+
+
+              def delete_all_files_of(user: user):
+                  files = storage.ls(user.username)
+                  for file in files:
+                      storage.delete_obj(file)
+                  logger.info(f'Deleted {len(files)} files belonging to: {user.username}')
+
+
+              def delete_user(user: User):
+                  logger.info(f'Attempting to delete user (id={user.id}): {user.username}')
+                  delete_all_feeds_of(user)
+                  delete_all_files_of(user)
+                  result = user.delete()
+                  logger.info(f'USER DELETED (id={user.id}): {user.username}')
+                  logger.debug(repr(result))
+
+
+              def main():
+                  today = datetime.date.today()
+                  some_time_ago = today - datetime.timedelta(days=)
+                  old_users = User.objects.filter(date_joined__lt=some_time_ago)
+                  deletable_users = filter(username_is_not_special, old_users)
+                  count = 0
+                  for user in deletable_users:
+                      delete_user(user)
+                      count += 1
+                  logger.info(f'FINISHED. Deleted {count} users.')
+
+
+              if __name__ == '__main__':
+                  logging.basicConfig(encoding='utf-8', level=logging.INFO)
+                  main()
+
+            # -------------------- END OF SCRIPT --------------------
+
+            env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: public-testing-postgresql
+            - name: PFCON_USER
+              valueFrom:
+                secretKeyRef:
+                  key: PFCON_USER
+                  name: public-testing-pfcon
+            - name: PFCON_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: PFCON_PASSWORD
+                  name: public-testing-pfcon
+            envFrom:
+            - configMapRef:
+                name: public-testing-cube-config
+            - configMapRef:
+                name: public-testing-db-config
+            - secretRef:
+                name: public-testing-cube-secrets
+            volumeMounts:
+            - mountPath: /data
+              name: file-storage
+            resources:
+              limits:
+                cpu: "1"
+                memory: 3814Mi
+              requests:
+                cpu: "1"
+                memory: 3814Mi
+          restartPolicy: Never
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+              - labelSelector:
+                  matchExpressions:
+                  - key: app.kubernetes.io/instance
+                    operator: In
+                    values:
+                    - public-testing
+                  - key: app.kubernetes.io/name
+                    operator: In
+                    values:
+                    - chris-heart
+                topologyKey: kubernetes.io/hostname
+          volumes:
+          - name: file-storage
+            persistentVolumeClaim:
+              claimName: public-testing-storebase
