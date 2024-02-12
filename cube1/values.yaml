@@ -56,11 +56,11 @@ cube:
     ## Recommended value is x4 the size of the largest anticipated plugin instance output directory.
     resources:
       requests:
-        memory: 14.9Gi
-        cpu: 4
+        memory: 2861Mi
+        cpu: 3
       limits:
-        memory: 14.9Gi
-        cpu: 4
+        memory: 2861Mi
+        cpu: 3
 
   workerPeriodic:
     ## Resources for the periodic worker.
@@ -317,31 +317,6 @@ pfdcm:
         memory: 3814Mi
     rustLog: pypx_dicomweb=DEBUG
 
-  # Optional front-end for PFDCM data, requires dicomweb
-  ohif:
-    enabled: true
-    replicaCount: 1
-    image:
-      repository: docker.io/ohif/app
-      pullPolicy: IfNotPresent
-      tag: "v3.7.0"
-    podAnnotations: {}
-    service:
-      type: ClusterIP
-      port: 8080
-    resources:
-      limits:
-        cpu: 500m
-        memory: 256Mi
-      requests:
-        cpu: 500m
-        memory: 256Mi
-    configuration:
-      friendlyName: ChRIS pfdcm
-      wadoUriRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
-      qidoRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
-      wadoRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
-
 # PACS server
 orthanc:
   enabled: true
@@ -435,6 +410,9 @@ orthanc:
     # "/tools/metrics-prometheus" formetted using the Prometheus
     # text-based exposition format.
     metricsEnabled: true
+
+  ohif:
+    enabled: true
 
   persistence:
     storage:
