@@ -414,8 +414,7 @@ orthanc:
     # The list of the registered users. Because Orthanc uses HTTP
     # Basic Authentication, the passwords are stored as plain text.
     # This MUST be set from the apply.sh script
-    registeredUsers:
-      why: is it wrong
+    registeredUsers: {}
 
     # The list of the known DICOM modalities
     #
