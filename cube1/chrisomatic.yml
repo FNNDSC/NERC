@@ -1,0 +1,18 @@
+version: 1.2
+
+on:
+  cube_url: https://cube1.chrisproject.org/api/v1/
+
+cube:
+  compute_resource:
+    - name: NERC
+  plugins:
+    - name: pl-dircopy
+      version: 2.1.1
+    - name: pl-tsdircopy
+      version: 1.2.1
+    - name: pl-topologicalcopy
+      version: 0.2
+    - name: pl-simpledsapp
+      version: 2.1.0
+    - name: pl-lld_inference
