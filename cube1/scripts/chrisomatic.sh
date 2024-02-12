@@ -13,7 +13,7 @@ fi
 
 # Get superuser credentials from OpenShift
 #################
-secret_json="$(oc get secret cube1-chris-superuser -o jsonpath='{.data}')"
+secret_json="$(oc -n hosting-of-medical-image-analysis-platform-dcb83b get secret cube1-chris-superuser -o jsonpath='{.data}')"
 if [ "$?" != "0" ]; then
   echo "could not get secret from OpenShift. Are you logged in?"
   exit 1

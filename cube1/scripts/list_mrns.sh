@@ -3,7 +3,7 @@
 
 set -o pipefail
 
-user_json="$(oc get secret orthanc-user -o jsonpath='{.data}')"
+user_json="$(oc -n hosting-of-medical-image-analysis-platform-dcb83b get secret orthanc-user -o jsonpath='{.data}')"
 if [ "$?" != '0' ]; then
   echo "error getting secret 'orthanc-user' from OpenShift. Are you logged in?"
   exit 1
