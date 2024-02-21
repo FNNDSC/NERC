@@ -342,7 +342,8 @@ orthanc:
     # The logical name of this instance of Orthanc. This one is
     # displayed in Orthanc Explorer and at the URI "/system".
     # must be fewer than 20 characters, see https://github.com/FNNDSC/ChRIS_ultron_backEnd/issues/533
-    name: "NERC Orthanc"
+    # N.B. Sandip's plugins like pl-exec break if the name contains spaces.
+    name: "NERC_Orthanc"
     # Enable the transparent compression of the DICOM instances
     storageCompression: false
     # Action to take when the maximum storage is reached.
