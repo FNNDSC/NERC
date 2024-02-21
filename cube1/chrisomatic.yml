@@ -8,7 +8,7 @@ cube:
     - name: NERC
   plugins:
     - name: pl-dircopy
-      version: 2.1.1
+      version: 2.1.2
     - name: pl-tsdircopy
       version: 1.2.1
     - name: pl-topologicalcopy

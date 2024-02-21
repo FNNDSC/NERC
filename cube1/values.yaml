@@ -211,7 +211,7 @@ pfcon:
       ENABLE_HOME_WORKAROUND: "yes"
       REMOVE_JOBS: "yes"
       IGNORE_LIMITS: "no"
-      NODE_SELECTOR: "kubernetes.io/hostname=wrk-10"  # DANGER! hard-coded to the node where the RWO volume is mounted
+      NODE_SELECTOR: "kubernetes.io/hostname=wrk-24"  # DANGER! hard-coded to the node where the RWO volume is mounted
 
     # Should be disabled on OpenShift.
     setSecurityContext: false
