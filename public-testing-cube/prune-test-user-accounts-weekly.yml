@@ -89,7 +89,7 @@ spec:
 
               def main():
                   today = datetime.date.today()
-                  some_time_ago = today - datetime.timedelta(days=)
+                  some_time_ago = today - datetime.timedelta(days=DAYS_AGE_TO_DELETE)
                   old_users = User.objects.filter(date_joined__lt=some_time_ago)
                   deletable_users = filter(username_is_not_special, old_users)
                   count = 0
