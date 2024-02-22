@@ -6,6 +6,7 @@ on:
 cube:
   compute_resource:
     - name: NERC
+    - name: NERC-other
   plugins:
     - name: pl-dircopy
       version: 2.1.2
