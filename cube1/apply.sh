@@ -15,4 +15,4 @@ cd "$HERE"
 exec helm upgrade -n hosting-of-medical-image-analysis-platform-dcb83b \
     -f values.yaml \
     --set "orthanc.config.registeredUsers.$username=$password" \
-    cube1 fnndsc/chris --version 0.6.0
+    cube1 fnndsc/chris --version 0.7.0

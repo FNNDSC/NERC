@@ -172,6 +172,10 @@ pfcon:
     size: 200Gi
     accessModes: [ "ReadWriteOnce" ]
 
+  # workaround for RWO volumes
+  nodeSelector:
+    kubernetes.io/hostname: wrk-13
+
   pfcon:
     resources:
       limits:
@@ -211,7 +215,7 @@ pfcon:
       ENABLE_HOME_WORKAROUND: "yes"
       REMOVE_JOBS: "yes"
       IGNORE_LIMITS: "no"
-      NODE_SELECTOR: "kubernetes.io/hostname=wrk-24"  # DANGER! hard-coded to the node where the RWO volume is mounted
+      NODE_SELECTOR: "kubernetes.io/hostname=wrk-13"  # must match pfcon.nodeSelector
 
     # Should be disabled on OpenShift.
     setSecurityContext: false

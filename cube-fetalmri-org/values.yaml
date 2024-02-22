@@ -161,6 +161,9 @@ pfcon:
   replicaCount: 1
   podAnnotations: {}
 
+  nodeSelector:
+    kubernetes.io/hostname: wrk-19
+
   service:
     type: ClusterIP
     port: 5005
@@ -210,7 +213,7 @@ pfcon:
       ENABLE_HOME_WORKAROUND: "yes"
       REMOVE_JOBS: "yes"
       IGNORE_LIMITS: "no"
-      NODE_SELECTOR: "kubernetes.io/hostname=wrk-19"  # DANGER! hard-coded to the node where the RWO volume is mounted
+      NODE_SELECTOR: "kubernetes.io/hostname=wrk-19"  # must match pfcon.nodeSelector
 
     # Should be disabled on OpenShift.
     setSecurityContext: false
