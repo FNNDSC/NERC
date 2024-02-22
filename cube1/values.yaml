@@ -36,13 +36,8 @@ cube:
     # enable LDAP login
     AUTH_LDAP: "false"
 
-  # Set of default plugins to register with the coupled pfcon (if .pfcon.enabled)
-  # Plugins which CUBE is hard-coded to depend on should be listed here.
-  # To add plugins for general use, see https://chrisproject.org/docs/tutorials/upload_plugin
-  plugins:
-    - https://cube.chrisproject.org/api/v1/plugins/170/ # pl-dircopy
-    - https://cube.chrisproject.org/api/v1/plugins/81/  # pl-tsdircopy
-    - https://cube.chrisproject.org/api/v1/plugins/10/  # pl-topologicalcopy
+  # Since this is the "mother" CUBE, it has nowhere to get plugins from, so plugins must be blank.
+  plugins: []
 
   # The volume is managed by pfcon's subchart, so leave this as "enabled: false"
   storage:

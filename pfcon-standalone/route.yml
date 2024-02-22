@@ -1,17 +1,18 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: acpo-pfcon
+  name: pfcon-standalone
   labels:
     app.kubernetes.io/name: pfcon
-    app.kubernetes.io/instance: acpo-only
+    app.kubernetes.io/instance: pfcon-standalone
 spec:
   to:
     kind: Service
-    name: acpo-only-pfcon
+    name: pfcon-standalone
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
     destinationCACertificate: ''
   port:
     targetPort: http
+  host: pfcon-standalone.apps.shift.nerc.mghpcc.org

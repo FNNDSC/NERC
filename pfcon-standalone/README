@@ -1,0 +1,6 @@
+A standalone pfcon operating in "innetwork=False" mode.
+
+This pfcon is used by:
+
+- cube1.chrisproject.org
+- rc-live.tch.harvard.edu:32222

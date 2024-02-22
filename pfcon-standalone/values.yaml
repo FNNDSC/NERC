@@ -13,6 +13,9 @@ storage:
   size: 40Gi
   accessModes: [ "ReadWriteOnce" ]
 
+nodeSelector:
+  kubernetes.io/hostname: wrk-5
+
 pfcon:
   image:
     repository: ghcr.io/fnndsc/pfcon
@@ -20,16 +23,16 @@ pfcon:
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
-  workers: 4
+  workers: 6
   workerTimeout: 3600
 
   resources:
     limits:
-      cpu: 1
-      memory: 4Gi
+      cpu: 1500m
+      memory: 5722Mi
     requests:
-      cpu: 1
-      memory: 4Gi
+      cpu: 1500m
+      memory: 5722Mi
 
   config:
     innetwork: false
@@ -48,21 +51,21 @@ pman:
   # pman doesn't do anything besides sending and receiving HTTP requests.
   resources:
     limits:
-      cpu: 200m
+      cpu: 500m
       memory: 1Gi
     requests:
-      cpu: 200m
+      cpu: 500m
       memory: 1Gi
 
   # pman configuration
   # https://github.com/fnndsc/pman#environment-variables
   # SECRET_KEY, CONTAINER_ENV, STORAGE_TYPE, VOLUME_NAME, and CONTAINER_USER are handled automaticallY
   config:
-    JOB_LABELS: chrisproject.org/job=plugininstance,chrisproject.org/instance=acpo
+    JOB_LABELS: chrisproject.org/job=plugininstance,chrisproject.org/instance=pfcon-standalone
     ENABLE_HOME_WORKAROUND: "yes"
     REMOVE_JOBS: "yes"
     IGNORE_LIMITS: "no"
-    NODE_SELECTOR: kubernetes.io/hostname=wrk-10  # see https://chrisproject.org/docs/run/helm#rwo-volume-workarounds
+    NODE_SELECTOR: kubernetes.io/hostname=wrk-5  # see https://chrisproject.org/docs/run/helm#rwo-volume-workarounds
 
   # Set securityContext of containers created by pman to have the same securityContext as .global.podSecurityContext
   # or the default fnndsc/cube container user, so that the container user can write to the shared volume's filesystem.
