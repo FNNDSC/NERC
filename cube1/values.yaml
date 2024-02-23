@@ -10,6 +10,25 @@ chris_admin:
   # If no password is set, then a random password is created for you.
   # password:
 
+
+# Ingress and HTTPS
+ingress:
+  enabled: true
+  className: openshift-default
+  annotations:
+    cert-manager.io/issuer: letsencrypt
+    acme.cert-manager.io/http01-ingress-class: openshift-default
+  hosts:
+    - host: cube.chrisproject.org
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: cube-chrisproject-org-letsencrypt
+      hosts:
+        - cube.chrisproject.org
+
+
 # ChRIS Backend
 #####################
 cube:
@@ -30,7 +49,7 @@ cube:
     # HTTP server security settings
     DJANGO_ALLOWED_HOSTS: "*"  # note: * is okay if OpenShift router or k8s igress is validating host header
     DJANGO_CORS_ALLOW_ALL_ORIGINS: "false"
-    DJANGO_CORS_ALLOWED_ORIGINS: "https://app1.chrisproject.org"
+    DJANGO_CORS_ALLOWED_ORIGINS: "https://app.chrisproject.org"
     DJANGO_SECURE_PROXY_SSL_HEADER: "HTTP_X_FORWARDED_PROTO,https"
     DJANGO_USE_X_FORWARDED_HOST: "true"
     # enable LDAP login
@@ -230,6 +249,14 @@ pfdcm:
     enabled: true
     type: ClusterIP
     port: 4005
+  # OpenShift route
+  route:
+    enabled: true
+    host: pfdcm.apps.shift.nerc.mghpcc.org
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+      destinationCACertificate: ''
   maxWorkers: 2
   resources:
     limits:

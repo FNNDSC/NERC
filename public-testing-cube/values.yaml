@@ -11,6 +11,14 @@ chris_admin:
   username: fnndsc
   email: dev@babymri.org
 
+route:
+  enabled: true
+  host: cube-for-testing-chrisui.apps.shift.nerc.mghpcc.org
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    destinationCACertificate: ''
+
 # ChRIS Backend
 #####################
 cube:
@@ -35,10 +43,10 @@ cube:
   # Plugins which CUBE is hard-coded to depend on should be listed here.
   # To add plugins for general use, see https://chrisproject.org/docs/tutorials/upload_plugin
   plugins:
-    - https://cube.chrisproject.org/api/v1/plugins/170/ # pl-dircopy
-    - https://cube.chrisproject.org/api/v1/plugins/81/  # pl-tsdircopy
-    - https://cube.chrisproject.org/api/v1/plugins/10/  # pl-topologicalcopy
-    
+    - https://cube.chrisproject.org/api/v1/plugins/1/   # pl-dircopy
+    - https://cube.chrisproject.org/api/v1/plugins/2/   # pl-tsdircopy
+    - https://cube.chrisproject.org/api/v1/plugins/3/   # pl-topologicalcopy
+
   # Resources
   #####################
   # Persistent volume for CUBE files
@@ -151,6 +159,9 @@ pfcon:
   replicaCount: 1
   podAnnotations: {}
 
+  nodeSelector:
+    kubernetes.io/hostname: wrk-3
+
   service:
     type: ClusterIP
     port: 5005
@@ -198,7 +209,7 @@ pfcon:
       ENABLE_HOME_WORKAROUND: "yes"
       REMOVE_JOBS: "yes"
       IGNORE_LIMITS: "no"
-      NODE_SELECTOR: "kubernetes.io/hostname=wrk-4"  # DANGER! hard-coded to the node where the RWO volume is mounted
+      NODE_SELECTOR: "kubernetes.io/hostname=wrk-3"  # must match pfcon.nodeSelector above
 
     # Should be disabled on OpenShift.
     setSecurityContext: false

@@ -1,7 +1,7 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: dicomweb1
+  name: dicomweb
   labels:
     app.kubernetes.io/name: cube1-pfdcm-dicomweb
     app.kubernetes.io/instance: cube1
@@ -15,4 +15,4 @@ spec:
     destinationCACertificate: ''
   port:
     targetPort: http
-  host: pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org
+  host: pfdcm-dicomweb.apps.shift.nerc.mghpcc.org

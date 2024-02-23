@@ -39,16 +39,16 @@ config:
   extensions: []
   modes: []
   showStudyList: true
-  defaultDataSourceName: "pfdcm1"
+  defaultDataSourceName: "pfdcm"
   dataSources:
     - namespace: "@ohif/extension-default.dataSourcesModule.dicomweb"
-      sourceName: "pfdcm1"
+      sourceName: "pfdcm"
       configuration:
-        friendlyName: "PFDCM1 on NERC"
-        name: "pfdcm1"
-        wadoUriRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
-        qidoRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
-        wadoRoot: "https://pfdcm1-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
+        friendlyName: "PFDCM on NERC"
+        name: "pfdcm"
+        wadoUriRoot: "https://pfdcm-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
+        qidoRoot: "https://pfdcm-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
+        wadoRoot: "https://pfdcm-dicomweb.apps.shift.nerc.mghpcc.org/dicomweb"
         qidoSupportsIncludeField: false
         supportsReject: false
         imageRendering: wadors

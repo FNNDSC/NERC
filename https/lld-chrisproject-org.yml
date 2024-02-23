@@ -1,7 +1,12 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app1-chrisproject-org
+  name: lld-chrisproject-org
+  labels:
+    app.kubernetes.io/name: chrisui
+    app.kubernetes.io/instance: lldanalysisui
+    app.kubernetes.io/component: frontend
+    app.kubernetes.io/part-of: chris
   annotations:
     cert-manager.io/issuer: letsencrypt
     acme.cert-manager.io/http01-ingress-class: openshift-default
@@ -9,16 +14,16 @@ spec:
   ingressClassName: openshift-default
   tls:
     - hosts:
-        - app1.chrisproject.org
-      secretName: app1-chrisproject-org-letsencrypt
+        - lld.chrisproject.org
+      secretName: lld-chrisproject-org-letsencrypt
   rules:
-    - host: app1.chrisproject.org
+    - host: lld.chrisproject.org
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: app1-chrisproject-org
+                name: lld-chrisproject-org
                 port:
                   number: 8080

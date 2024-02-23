@@ -1,17 +1,18 @@
 kind: Route
 apiVersion: route.openshift.io/v1
 metadata:
-  name: cube-for-testing-chrisui
+  name: pfdcm
   labels:
-    app.kubernetes.io/name: public-testing
+    app.kubernetes.io/name: pfdcm
+    app.kubernetes.io/instance: cube1
 spec:
   to:
     kind: Service
-    name: public-testing-server
+    name: cube1-pfdcm
   tls:
     termination: edge
     insecureEdgeTerminationPolicy: Redirect
     destinationCACertificate: ''
   port:
     targetPort: http
-  host: cube-for-testing-chrisui.apps.shift.nerc.mghpcc.org
+  host: pfdcm.apps.shift.nerc.mghpcc.org

@@ -13,6 +13,14 @@ chris_admin:
   email: dev@babymri.org
   # password is not set here. It is stored as a Kubernetes secret.
 
+route:
+  enabled: true
+  host: fetalmri-cube.apps.shift.nerc.mghpcc.org
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    destinationCACertificate: ''
+
 # ChRIS Backend
 #####################
 cube:
@@ -35,10 +43,8 @@ cube:
   # Set of default plugins to register with the coupled pfcon (if .pfcon.enabled)
   # Plugins which CUBE is hard-coded to depend on should be listed here.
   # To add plugins for general use, see https://chrisproject.org/docs/tutorials/upload_plugin
-  plugins:
-    - https://cube.chrisproject.org/api/v1/plugins/170/ # pl-dircopy
-    - https://cube.chrisproject.org/api/v1/plugins/81/  # pl-tsdircopy
-    - https://cube.chrisproject.org/api/v1/plugins/10/  # pl-topologicalcopy
+  plugins: []
+
 
   # Ingress
   #####################
@@ -172,7 +178,7 @@ pfcon:
   # It is recommended to allocate as much space as possible for CUBE files.
   storage:
     existingClaim: ""
-    size: 100Gi
+    size: 32Gi
     accessModes: [ "ReadWriteOnce" ]
 
   pfcon:
