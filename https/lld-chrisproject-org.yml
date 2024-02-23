@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
   name: lld-chrisproject-org
   labels:
-    app.kubernetes.io/name: chrisui
+    app.kubernetes.io/name: lldanalysisui
     app.kubernetes.io/instance: lldanalysisui
     app.kubernetes.io/component: frontend
     app.kubernetes.io/part-of: chris
@@ -24,6 +24,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: lld-chrisproject-org
+                name: lldanalysisui
                 port:
-                  number: 8080
+                  number: 3000
