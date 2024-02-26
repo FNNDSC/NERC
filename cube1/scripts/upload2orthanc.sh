@@ -1,6 +1,5 @@
 #!/bin/bash
 # Purpose: upload a directory of DICOMs to Orthanc.
-# For unknown reasons, this script is rather slow.
 
 if ! [ -d "$1" ]; then
   echo "Must give a directory of DICOM files."
@@ -17,10 +16,5 @@ password="$(echo "$user_json" | jq -r .password | base64 -d)"
 
 url="https://orthanc.chrisproject.org/instances"
 
-files="$(find -L "$1" -type f -name '*.dcm')"
-total="$(wc -l <<< "$files")"
-
-echo "$files" \
-  | tqdm --total=$total --unit=files --desc=Uploading \
-  | xargs -I '{}' curl -sfX POST -u "$username:$password" "$url" \
-      -H 'Expect:' -H 'Content-Type: application/dicom' --data-binary @'{}' -o /dev/null
+find -L "$1" -type f -name '*.dcm' \
+  | parallel --bar --eta -j1 "curl -sfX POST -u \"$username:$password\" \"$url\" -H 'Expect:' -H 'Content-Type: application/dicom' --data-binary @'{}' -o /dev/null"
