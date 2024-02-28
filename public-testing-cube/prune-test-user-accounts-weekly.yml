@@ -71,7 +71,7 @@ spec:
                       logger.info(f'Deleted feed (id={feed.id}): {feed.name}')
 
 
-              def delete_all_files_of(user: user):
+              def delete_all_files_of(user: User):
                   files = storage.ls(user.username)
                   for file in files:
                       storage.delete_obj(file)
@@ -99,9 +99,8 @@ spec:
                   logger.info(f'FINISHED. Deleted {count} users.')
 
 
-              if __name__ == '__main__':
-                  logging.basicConfig(encoding='utf-8', level=logging.INFO)
-                  main()
+              logging.basicConfig(encoding='utf-8', level=logging.INFO)
+              main()
 
             # -------------------- END OF SCRIPT --------------------
 
