@@ -17,4 +17,4 @@ password="$(echo "$user_json" | jq -r .password | base64 -d)"
 url="https://orthanc.chrisproject.org/instances"
 
 find -L "$1" -type f -name '*.dcm' \
-  | parallel --bar --eta -j1 "curl -sfX POST -u \"$username:$password\" \"$url\" -H 'Expect:' -H 'Content-Type: application/dicom' --data-binary @'{}' -o /dev/null"
+  | parallel --bar --eta -j1 "curl -sSfX POST -u \"$username:$password\" \"$url\" -H 'Expect:' -H 'Content-Type: application/dicom' -T {} -o /dev/null"
