@@ -50,7 +50,7 @@ spec:
     spec:
       containers:
       - name: openobserve
-        image: public.ecr.aws/zinclabs/openobserve:v0.6.4
+        image: public.ecr.aws/zinclabs/openobserve:v0.9.2-rc1
         env:
           - name: ZO_DATA_DIR
             value: /data
