@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: openobserve
+  labels:
+    app.kubernetes.io/name: openobserve
+spec:
+  to:
+    kind: Service
+    name: openobserve
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    destinationCACertificate: ''
+  port:
+    targetPort: http
+  host: openobserve-fnndsc.apps.shift.nerc.mghpcc.org
