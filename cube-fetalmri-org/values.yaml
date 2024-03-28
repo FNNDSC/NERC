@@ -31,6 +31,7 @@ cube:
   # Configuration
   #####################
   config:
+    GUNICORN_CMD_ARGS: "--workers 4 --timeout 60"
     CUBE_CELERY_POLL_INTERVAL: "10.0"
     # HTTP server security settings
     DJANGO_ALLOWED_HOSTS: "*"
@@ -44,7 +45,6 @@ cube:
   # Plugins which CUBE is hard-coded to depend on should be listed here.
   # To add plugins for general use, see https://chrisproject.org/docs/tutorials/upload_plugin
   plugins: []
-
 
   # Ingress
   #####################
@@ -67,34 +67,33 @@ cube:
     ## Resources for the main worker.
     resources:
       requests:
-        memory: 4Gi
-        cpu: 1
+        memory: 1907Mi
+        cpu: 500m
       limits:
-        memory: 4Gi
-        cpu: 1
+        memory: 1907Mi
+        cpu: 500m
 
   workerPeriodic:
     ## Resources for the periodic worker.
     ## Default values should be okay. Memory request may be further reduced to ~400Mi.
     resources:
       requests:
-        memory: 1Gi
+        memory: 953Mi
         cpu: 250m
       limits:
-        memory: 1Gi
+        memory: 953Mi
         cpu: 250m
 
   server:
-    workers: 8
     ## resources for the HTTP server (WSGI).
     ## Default values should be okay. About 256Mi of memory is needed per idle worker.
     resources:
       requests:
-        memory: 4Gi
-        cpu: 2
+        memory: 3814Mi
+        cpu: 1
       limits:
-        memory: 4Gi
-        cpu: 2
+        memory: 3814Mi
+        cpu: 1
 
 # Database
 #####################
