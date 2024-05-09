@@ -1,0 +1,52 @@
+storage:
+  size: 4Gi
+  accessModes: [ "ReadWriteOnce" ]
+  storageClass: ocs-external-storagecluster-ceph-rbd
+
+nodeSelector:
+  kubernetes.io/hostname: wrk-97
+
+pfcon:
+  workers: 4
+  workerTimeout: 3600
+
+  # pfcon needs a lot of memory because it receives data as one large zip file in memory.
+  resources:
+    limits:
+      cpu: 1500m
+      memory: 9536Mi
+    requests:
+      cpu: 1500m
+      memory: 9536Mi
+
+  # pfcon configuration
+  config:
+    innetwork: false
+    storageEnv: zipfile
+
+pman:
+  workers: 4
+  workerTimeout: 30
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1907Mi
+    requests:
+      cpu: 500m
+      memory: 1907Mi
+
+  # pman configuration
+  # https://github.com/fnndsc/pman#environment-variables
+  # SECRET_KEY, CONTAINER_ENV, STORAGE_TYPE, VOLUME_NAME, and CONTAINER_USER are handled automaticallY
+  config:
+    JOB_LABELS: chrisproject.org/job=plugininstance,chrisproject.org/instance=pfcon-gpu-bigshm
+    ENABLE_HOME_WORKAROUND: "yes"
+    REMOVE_JOBS: "yes"
+    IGNORE_LIMITS: "no"
+    SHM_SIZE: "1024"  # mount 1024 MiB of memory to /dev/shm
+    NODE_SELECTOR: "kubernetes.io/hostname=wrk-97"  # same as nodeSelector above
+
+  # Should be disabled on OpenShift.
+  setSecurityContext: false
+
