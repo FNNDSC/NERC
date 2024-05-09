@@ -73,10 +73,10 @@ cube:
     ## Recommended value is x4 the size of the largest anticipated plugin instance output directory.
     resources:
       requests:
-        memory: 2861Mi
+        memory: 11444Mi
         cpu: 3
       limits:
-        memory: 2861Mi
+        memory: 11444Mi
         cpu: 3
 
   workerPeriodic:
@@ -154,6 +154,14 @@ rabbitmq:
   auth:
     username: "chris"
     password: "chris1234"
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 3814Mi
+    requests:
+      cpu: 1
+      memory: 3814Mi
 
   persistence:
     enabled: true

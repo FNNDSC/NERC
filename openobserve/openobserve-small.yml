@@ -59,11 +59,11 @@ spec:
               name: openobserve-root-user  # created manually
         resources:
           limits:
-            cpu: 2
-            memory: 4Gi
+            cpu: 1
+            memory: 3814Mi
           requests:
-            cpu: 2
-            memory: 2Gi
+            cpu: 1
+            memory: 3814Mi
         ports:
         - containerPort: 5080
           name: http
