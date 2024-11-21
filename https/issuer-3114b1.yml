@@ -2,11 +2,11 @@ apiVersion: cert-manager.io/v1
 kind: Issuer
 metadata:
   name: letsencrypt
-  namespace: hosting-of-medical-image-analysis-platform-dcb83b
+  namespace: chris-3114b1
 spec:
   acme:
     privateKeySecretRef:
-      name: letsencrypt-key  # must be something unique
+      name: letsencrypt-key-3114b1  # must be something unique
     solvers:
       - http01:
           ingress:
