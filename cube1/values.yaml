@@ -36,7 +36,7 @@ cube:
     repository: ghcr.io/fnndsc/cube
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "5.1.0"  # see https://github.com/FNNDSC/ChRIS_ultron_backEnd/releases/tag/v5.1.0
 
   # Use inter-pod affinity as a workaround for using a ReadWriteOnce PersistentVolumeClaim
   enablePodAffinityWorkaround: true
