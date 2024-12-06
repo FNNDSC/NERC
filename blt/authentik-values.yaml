@@ -21,6 +21,9 @@ server:
       - secretName: auth-blt-chrisproject-org-letsencrypt
         hosts: *HOSTS
 
+worker:
+  serviceAccountName: "authentik"
+
 # Doesn't work on NERC-OCP because subchart is hard-coded to need
 # apiextensions.k8s.io, traefik.containo.us, traefik.io
 serviceAccount:
@@ -29,7 +32,7 @@ serviceAccount:
 
 geoip:
   # -- enable GeoIP sidecars for the authentik server and worker pods
-  enabled: true
+  enabled: false  # temporarily disabling geoip updates because of rate limiting
   editionIds: "GeoLite2-City GeoLite2-ASN"
   # -- GeoIP update frequency, in hours
   updateInterval: 24
@@ -97,3 +100,59 @@ redis:
     containerSecurityContext:
       enabled: false
 
+additionalObjects:
+  - apiVersion: v1
+    kind: ServiceAccount
+    metadata: &SA_METADATA
+      name: authentik
+      namespace: '{{ .Release.Namespace }}'
+      labels:
+        app.kubernetes.io/name: '{{ include "authentik.name" . }}'
+        app.kubernetes.io/instance: '{{ .Release.Name }}'
+        app.kubernetes.io/part-of: authentik
+        app.kubernetes.io/managed-by: '{{ .Release.Service }}'
+        helm.sh/chart: '{{ include "authentik.chart" . }}'
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata: *SA_METADATA
+    roleRef:
+      apiGroup: rbac.authorization.k8s.io
+      kind: Role
+      name: authentik
+    subjects:
+      - kind: ServiceAccount
+        name: authentik
+        namespace: '{{ .Release.Namespace }}'
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata: *SA_METADATA
+    rules:
+      - apiGroups:
+          - ""
+        resources:
+          - secrets
+          - services
+          - configmaps
+        verbs: &VERBS_RW
+          - get
+          - create
+          - delete
+          - list
+          - patch
+      - apiGroups:
+          - extensions
+          - apps
+        resources:
+          - deployments
+        verbs: *VERBS_RW
+      - apiGroups:
+          - extensions
+          - networking.k8s.io
+        resources:
+          - ingresses
+        verbs: *VERBS_RW
+      - apiGroups:
+          - monitoring.coreos.com
+        resources:
+          - servicemonitors
+        verbs: *VERBS_RW
