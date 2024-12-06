@@ -22,13 +22,12 @@ server:
         hosts: *HOSTS
 
 worker:
+  # Manually defined ServiceAccount, see `additionalObjects`
   serviceAccountName: "authentik"
 
-# Doesn't work on NERC-OCP because subchart is hard-coded to need
-# apiextensions.k8s.io, traefik.containo.us, traefik.io
 serviceAccount:
-  # -- Create service account. Needed for managed outposts
-  create: false  # doesn't work on NERC-OCP because
+  # doesn't work on OpenShift, see https://github.com/goauthentik/helm/issues/305
+  create: false
 
 geoip:
   # -- enable GeoIP sidecars for the authentik server and worker pods
