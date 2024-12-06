@@ -8,3 +8,8 @@ Make sure not to upload secrets in here!
 
 Some documentation _might_ be found here: https://chrisproject.org/docs/internal/nerc
 
+## Notes
+
+Use `helmfile sync` instead of `helmfile apply`. See https://github.com/databus23/helm-diff/issues/460#issuecomment-1642653675
+
+
