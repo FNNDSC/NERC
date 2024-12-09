@@ -15,7 +15,7 @@ ackee:
   # Custom name for the tracking script of Ackee to avoid getting blocked by browser extensions
   trackerName: tracker
   # Setting CORS headers
-  corsHeaders: "https://chrisproject.org,https://app.chrisproject.org,https://app.fetalmri.org"
+  corsHeaders: "https://chrisproject.org,https://app.chrisproject.org,https://app.fetalmri.org,https://blt.chrisproject.org"
 
 ingress:
   # Enable ingress controller resource

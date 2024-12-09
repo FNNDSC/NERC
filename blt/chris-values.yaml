@@ -1,0 +1,474 @@
+global:
+  storageClass: 'ocs-external-storagecluster-ceph-rbd'
+  defaultStorageClass: 'ocs-external-storagecluster-ceph-rbd'
+
+  imagePullSecret:
+    - name: fnndscnercpull  # DockerHub login for increased rate-limit
+
+ingress:
+  enabled: true
+  className: openshift-default
+  annotations:
+    cert-manager.io/issuer: letsencrypt
+    acme.cert-manager.io/http01-ingress-class: openshift-default
+  hosts:
+    - host: cube.blt.chrisproject.org
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: cube-blt-chrisproject-org-letsencrypt
+      hosts:
+        - cube.blt.chrisproject.org
+
+# OpenShift route
+route:
+  enabled: false
+
+# ChRIS Backend
+#####################
+cube:
+  image:
+    repository: ghcr.io/fnndsc/cube
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+
+  # Use inter-pod affinity as a workaround for using a ReadWriteOnce PersistentVolumeClaim
+  enablePodAffinityWorkaround: true
+
+  # Prefix to use for job names submitted to Kubernetes. Ideally, this should be unique for each CUBE instance.
+  # The default behavior is to use the release name as the job prefix.
+  # jobPrefix: ""
+
+  # Configuration
+  #####################
+  config:
+    # smaller values increases responsiveness at the cost of resource usage and possibly concurrency bugs
+    CUBE_CELERY_POLL_INTERVAL: "10.0"
+    # HTTP server security settings
+    DJANGO_ALLOWED_HOSTS: "*"  # note: * is okay if OpenShift router or k8s igress is validating host header
+    DJANGO_CORS_ALLOW_ALL_ORIGINS: "false"
+    DJANGO_CORS_ALLOWED_ORIGINS: "https://blt.chrisproject.org"
+    DJANGO_SECURE_PROXY_SSL_HEADER: "HTTP_X_FORWARDED_PROTO,https"
+    DJANGO_USE_X_FORWARDED_HOST: "true"
+    DISABLE_USER_ACCOUNT_CREATION: "true"
+    AUTH_LDAP: "true"
+    AUTH_LDAP_SERVER_URI: "ldap://ak-outpost-ldap:389"
+    AUTH_LDAP_BIND_DN: "cn=ldapservice,ou=users,dc=blt,dc=chrisproject,dc=org"
+    AUTH_LDAP_USER_SEARCH_ROOT: "ou=users,dc=blt,dc=chrisproject,dc=org"
+    AUTH_LDAP_GROUP_SEARCH_ROOT: "dc=blt,dc=chrisproject,dc=org"
+    AUTH_LDAP_CHRIS_ADMIN_GROUP: chris-admin
+
+    AUTH_LDAP_USER_SEARCH_FILTER: '(cn=%(user)s)'  # Authentik usernames are exposed as cn
+    AUTH_LDAP_USER_FLAGS_BY_GROUP: ''  # workaround for https://github.com/goauthentik/authentik/issues/7522#issuecomment-2525303023
+
+
+  # Set of default plugins to register with the coupled pfcon (if .pfcon.enabled)
+  # Plugins which CUBE is hard-coded to depend on should be listed here.
+  # To add plugins for general use, see https://chrisproject.org/docs/tutorials/upload_plugin
+  plugins:
+    - https://cube.chrisproject.org/api/v1/plugins/1/   # pl-dircopy
+    - https://cube.chrisproject.org/api/v1/plugins/2/   # pl-tsdircopy
+    - https://cube.chrisproject.org/api/v1/plugins/3/   # pl-topologicalcopy
+
+  storage:
+    # In the default configuration, the volume is managed by pfcon's subchart, so leave this as "enabled: false"
+    enabled: false
+
+  # -- Main celery worker configuration.
+  workerMains:
+    # -- Resources for the main worker.
+    # -- If an out-of-network pfcon is configured, memory allocation must be **at least**
+    # -- twice as large as the largest anticipated plugin instance output directory's
+    # -- total size. This is because of an inefficient implementation.
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1
+      limits:
+        memory: 2Gi
+        cpu: 1
+
+  workerPeriodic:
+    ## Resources for the periodic worker.
+    ## Default values should be okay. Memory request may be further reduced to ~400Mi.
+    resources:
+      requests:
+        memory: 1Gi
+        cpu: 250m
+      limits:
+        memory: 1Gi
+        cpu: 250m
+
+  # -- CUBE ASGI server configuration.
+  server:
+    # -- CUBE server pod annotations.
+    podAnnotations: {}
+    # -- Deployment replicas count.
+    replicas: 1
+    # -- Service configuration.
+    service:
+      type: ClusterIP
+      port: 8000
+      # -- CUBE server service nodePort
+      nodePort:
+      # -- nodePortHost does nothing. It is simply used to print the URL of CUBE in the NOTES
+      nodePortHost:
+
+    # -- Resources for the HTTP server (ASGI).
+    # -- Default values should be okay. About 256Mi of memory is needed per idle worker.
+    resources:
+      requests:
+        memory: 2Gi
+        cpu: 1
+      limits:
+        memory: 2Gi
+        cpu: 1
+
+    # -- CUBE server container hostPort.
+    hostPort:
+
+# [SUBCHART] PostgreSQL packaged by Bitnami
+# https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters
+postgresql:
+  enabled: true
+  auth:
+    database: "chris"
+    username: "chris"
+  # one of: [standalone, replication]
+  architecture: standalone
+  primary:
+    resources:
+      requests:
+        memory: 4Gi
+        cpu: 1
+      limits:
+        memory: 4Gi
+        cpu: 1
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# [SUBCHART] RabbitMQ packaged by Bitnami
+# https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#parameters
+rabbitmq:
+  resourcesPreset: medium
+  persistence:
+    enabled: true
+    size: 1Gi
+  serviceBindings:
+    enabled: true  # required
+
+# -- Configuration of NATS, a messaging system. In ChRIS, NATS is used for PACS retrieve
+# -- progress messages sent from oxidicom to CUBE.
+# -- Documentation: https://github.com/bitnami/charts/tree/nats/8.4.3/bitnami/nats
+nats:
+  resourcesPreset: small
+  podLabels:
+    app.kubernetes.io/part-of: chris
+  auth:
+    # -- CUBE does not support NATS authorization
+    enabled: false
+
+# -- Configuration of pfcon, the ChRIS compute controller
+pfcon:
+  enabled: true
+
+  name: "NERC-OCP"
+  description: "NERC-OCP compute resource"
+  replicaCount: 1
+  podAnnotations: {}
+  podSecurityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 5005
+
+  nodeSelector: {}
+
+  # -- Storage space for CUBE files should be configured here.
+  # -- It is recommended to allocate as much space as possible for CUBE files.
+  storage:
+    existingClaim: ""
+    size: 32Gi
+    accessModes: [ "ReadWriteOnce" ]
+
+  pfcon:
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 384Mi
+
+    # -- pfcon configuration
+    # -- Recommended to keep as-is
+    config:
+      innetwork: true
+      storageEnv: fslink
+
+    # -- Extra environment variables.
+    extraEnv:
+      GUNICORN_CMD_ARGS: "--workers=4 --timeout=3600"
+
+  pman:
+    # It is unnecessary to increase pman's resources to above the minimum because
+    # pman doesn't do anything besides sending and receiving HTTP requests.
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+    workers: 4
+    workerTimeout: 30
+
+    # pman configuration
+    # https://github.com/fnndsc/pman#environment-variables
+    # SECRET_KEY, CONTAINER_ENV, STORAGE_TYPE, VOLUME_NAME, and CONTAINER_USER are handled automatically
+    config:
+      JOB_LABELS: chrisproject.org/job=plugininstance,chrisproject.org/instance=blt
+      ENABLE_HOME_WORKAROUND: "yes"
+      REMOVE_JOBS: "yes"
+      IGNORE_LIMITS: "no"
+
+# -- Configuration of PFDCM, the ChRIS PACS bridge
+pfdcm:
+  # -- Enable PFDCM, the ChRIS PACS bridge
+  enabled: false
+
+  # -- String to partially override the names template
+  nameOverride: ""
+  # -- String to fully override the names template
+  fullnameOverride: ""
+
+  # -- Extra environment variables for the PFDCM container.
+  # -- Note: PORT is configured automatically, it is not recommended to set it manually.
+  extraEnv:
+    # -- Maximum number of web server workers.
+    MAX_WORKERS: 4
+
+  # -- Image for PFDCM
+  image:
+    repository: ghcr.io/fnndsc/pfdcm
+    pullPolicy: IfNotPresent
+    tag: "3.1.22"
+
+  imagePullSecrets: []
+
+  # -- DICOM application entity title
+  aet: "ChRIS"
+
+  # -- Additional PFDCM configuration. Usually, you don't need to change this.
+  additionalConfig:
+    # -- Deprecated configuration of ChRIS backends.
+    cube: {}
+      # local:
+      #   url: https://cube.example.org/api/v1/
+      #   username: pfdcm
+      #   password: pfdcm1234
+    # -- Deprecated configuration of storage.
+    storage: {}
+      # local:
+      #   storagetype: fs
+      #   storepath: /files
+    # -- Configuration of PACS.
+    pacs:
+      # -- Configuration of PACS services PFDCM can talk with.
+      # -- If the Orthanc subchart below is enabled, the correct values for []
+      # -- it will be automatically filled in. If PFDCM need to speak with
+      # -- other PACS outside of this chart, add them here.
+      services: {}
+        # orthanc:
+        #   info:
+        #     aet: CHRISLOCAL
+        #     aet_listener: ORTHANC
+        #     aec: ORTHANC
+        #     serverIP: orthanc
+        #     serverPort: 4242
+
+  podAnnotations: {}
+  podLabels: {}
+
+  podSecurityContext: {}
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+      - ALL
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+
+  resources:
+    limits:
+      cpu: 250m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 1Gi
+
+  hostPort:
+  
+  readinessProbe: {}
+
+  livenessProbe:
+    httpGet:
+      path: /api/v1/about/
+      port: http
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+
+  startupProbe: {}
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  # -- Labels for the Deployment/Service resource.
+  labels: {}
+
+  # -- Annotations for the Deployment/Service resource.
+  annotations: {}
+
+  # Kind configuration
+  #####################
+  # -- kind must be one of:
+  # --
+  # -- - "Deployment": use (standard) Kubernetes Deployment and Service APIs
+  # -- - "Service": use the KNative Serving API
+  kind: Deployment
+
+  # KNative Serving configuration
+  #####################
+  # -- KNative Serving revision annotations.
+  # -- Only used with `pfdcm.kind=Service`
+  revisionAnnotations: {}
+    # autoscaling.knative.dev/target: "100"
+    # autoscaling.knative.dev/min-scale: "1"
+    # autoscaling.knative.dev/max-scale: "3"
+    # autoscaling.knative.dev/scale-to-zero-pod-retention-period: "1m5s"
+
+  # Deployment configuration
+  #####################
+
+  # -- This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+  # -- Ignored if `autoscaling.enabled=true`
+  # -- Only used with `pfdcm.kind=Deployment`
+  replicaCount: 1
+
+  # -- This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+  # -- Only used with `pfdcm.kind=Deployment`
+  service:
+    # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+    type: ClusterIP
+    # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+    port: 4005
+    # nodePort:
+    annotations:
+      kubernetes.io/description: PFDCM API. Swagger docs available on /docs
+
+  # -- This block is for setting up the ingress for more information can be found here: https://kubernetes.io/docs/concepts/services-networking/ingress/
+  # -- Only used with `pfdcm.kind=Deployment`
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # -- OpenShift route.
+  # -- Only used with `pfdcm.kind=Deployment`
+  route:
+    enabled: false
+    host: chart-example.local
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+      destinationCACertificate: ''
+
+  # -- This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+  # -- Only used with `pfdcm.kind=Deployment`
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # -- DICOM listener for pfdcm. Enabled when pfdcm is enabled.
+  listener:
+    image:
+      repository: ghcr.io/fnndsc/oxidicom
+      pullPolicy: Always
+      tag: "pr-3"  # pre-alpha, has known bugs.
+    podAnnotations: {}
+    # -- (optional) hostPort for DICOM listener
+    hostPort:
+    # -- The PACS server must be configured to push to this service.
+    # -- If using Orthanc, the Helm chart will help you validate your
+    # -- configuration of Orthanc's modailities to include this service.
+    service:
+      enabled: true
+      type: ClusterIP
+      port: 11111
+      # nodePort: 30033
+    replicas: 1
+    ## manual configuration of OpenTelemetry
+    # env:
+    #   - name: OTEL_RESOURCE_ATTRIBUTES
+    #     value: service.name=oxidicom
+    #   - name: OTEL_EXPORTER_OTLP_ENDPOINT
+    #     value: http://tempo:4317
+
+    # -- Optional configurations of oxidicom.
+    config:
+      # -- number of DICOM listener threads
+      # -- ref: https://chrisproject.org/docs/oxidicom/deployment#performance-tuning
+      listenerThreads: 8
+
+      # -- number of Tokio runtime threads
+      # -- ref: https://chrisproject.org/docs/oxidicom/deployment#performance-tuning
+      tokioThreads: 4
+
+      # -- enable/disable logging and set verbosity of components
+      logging: oxidicom=warn
+
+      ## strictPduLength, uncompressedOnly, and maxPduLength are strange DICOM
+      ## options which you probably want to leave as their default values.
+      # strictPduLength: true
+      # uncompressedOnly: true
+      # maxPduLength: 16384
+      ## Whether to accept unknown DICOM transfer syntaxes.
+      # promiscuous: true
+
+    resources:
+      # It's written in Rust!
+      # Memory usage typically stays under 20MiB, unless there is backpressure
+      # from slow disk write speed
+      limits:
+        cpu: 250m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+orthanc:
+  enabled: false

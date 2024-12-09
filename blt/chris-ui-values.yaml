@@ -1,0 +1,29 @@
+cubeUrl: https://cube.blt.chrisproject.org/api/v1/
+pfdcmUrl: http://localhost
+ackeeServer: https://ackee.chrisproject.org
+ackeeDomainId: 55bee671-bce5-46f7-93da-7b750ac34939
+
+resources:
+  requests: &UI_REQUESTS
+    cpu: 500m
+    memory: 256Mi
+  limits: *UI_REQUESTS
+
+# note: kind: Service is blocked on https://mghpcc.supportsystem.com/tickets.php?id=13078
+kind: Deployment
+
+ingress:
+  enabled: true
+  className: openshift-default
+  annotations:
+    cert-manager.io/issuer: letsencrypt
+    acme.cert-manager.io/http01-ingress-class: openshift-default
+  hosts:
+    - host: blt.chrisproject.org
+      paths:
+        - path: /
+          pathType: Prefix
+  tls:
+    - secretName: blt-chrisproject-org-letsencrypt
+      hosts:
+        - blt.chrisproject.org

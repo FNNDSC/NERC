@@ -6,31 +6,36 @@ helmDefaults:
   createNamespace: false
 
 releases:
-  - name: trial-authentik
+  - name: authentik
     namespace: chris-3114b1
     chart: authentik/authentik
     version: "2024.10.4"
     values:
-      - authentik-values.yaml
+      - ../authentik-values.yaml
       - authentik:
           # manually created secret
-          secret_key: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/trial-authentik-bootstrap/secret_key" | quote }}
+          secret_key: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-bootstrap/secret_key" | quote }}
           postgresql:
-            # manually created secret, so that the same value can be used between
-            # .authentik.postgresql.password and the bitnami/postgresql subchart
-            password: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/trial-authentik-db-passwords/password" | quote }}
+            host: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/host" | quote }}
+            name: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/database" | quote }}
+            user: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/username" | quote }}
+            password: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/password" | quote }}
+            port: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/port" | quote }}
+          redis:
+            host: "authentik-valkey-primary"
+            password: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-valkey/valkey-password" | quote }}
           storage:
             media:
               backend: s3
-              # NERC OpenStack Swift object storage
               # N.B.: configuration of Authentik to use S3 (instead of filesystem)
               # for media storage conveniently works around a permission denied issue
               # on the `/media` directory
               s3:
-                region: ""
+                # NERC OpenStack Swift object storage
                 endpoint: "https://stack.nerc.mghpcc.org:13808"
                 custom_domain: "stack.nerc.mghpcc.org:13808/swift/v1/AUTH_2dd3b02b267242d9b28f94a512ea9ede/blt-authentik-media"
                 use_ssl: "true"
+                region: ""
                 bucket_name: "blt-authentik-media"
                 access_key: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/nerc-openstack-ec2/access_key" | quote }}
                 secret_key: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/nerc-openstack-ec2/secret_key" | quote }}
@@ -74,3 +79,4 @@ releases:
                 resources:
                   - servicemonitors
                 verbs: *VERBS_RW
+

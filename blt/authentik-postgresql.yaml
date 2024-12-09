@@ -1,0 +1,37 @@
+global:
+  defaultStorageClass: ocs-external-storagecluster-ceph-rbd
+
+architecture: standalone
+
+auth:
+  username: authentik
+  database: authentik
+
+primary:
+  resources:
+    requests: &POSTGRES_RESOURCES
+      memory: 2Gi
+      cpu: 500m
+    limits: *POSTGRES_RESOURCES
+  persistence:
+    enabled: true
+    size: 4Gi
+
+backup:
+  enabled: true
+  cronjob:
+    schedule: "@hourly"  # TODO change me to @daily
+    failedJobsHistoryLimit: 2
+    successfulJobsHistoryLimit: 2
+    resources:
+      requests: &CRONJOB_RESOURCES
+        memory: 1Gi
+        cpu: 250m
+      limits: *CRONJOB_RESOURCES
+    storage:
+      enabled: true
+      size: 8Gi
+
+serviceBindings:
+  enabled: true
+

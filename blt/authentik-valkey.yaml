@@ -1,0 +1,22 @@
+global:
+  defaultStorageClass: ocs-external-storagecluster-ceph-rbd
+
+auth:
+  enabled: true
+
+architecture: standalone
+
+primary:
+  resources:
+    requests: &VALKEY_REQUESTS
+      cpu: 500m
+      memory: 2Gi
+    limits: *VALKEY_REQUESTS
+  persistence:
+    enabled: true
+    size: 4Gi
+
+serviceBindings:
+  # Bugged. See https://github.com/bitnami/charts/issues/30842
+  enabled: false
+

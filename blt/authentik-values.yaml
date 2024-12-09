@@ -44,58 +44,10 @@ geoip:
     # -- key in the secret containing the license key
     licenseKey: "license-key"
 
-# Ref: https://github.com/bitnami/charts/blob/postgresql/12.12.10/bitnami/postgresql/README.md
 postgresql:
-  enabled: true
-  architecture: standalone
-  auth:
-    username: authentik
-    database: authentik
-    existingSecret: trial-authentik-db-passwords
-  primary:
-    resources:
-      requests: &POSTGRES_RESOURCES
-        memory: 2Gi
-        cpu: 500m
-      limits: *POSTGRES_RESOURCES
-    podSecurityContext:
-      enabled: false
-    containerSecurityContext:
-      enabled: false
-    persistence:
-      enabled: true
-      storageClass: ocs-external-storagecluster-ceph-rbd
-      size: 4Gi
-  backup:
-    enabled: true
-    cronjob:
-      schedule: "@daily"
-      concurrencyPolicy: ""
-      failedJobsHistoryLimit: 2
-      successfulJobsHistoryLimit: 2
-      podSecurityContext:
-        enabled: false
-      containerSecurityContext:
-        runAsUser: null
-        runAsGroup: null
+  # subchart very outdated, so we use our own.
+  enabled: false
 
-# Ref: https://github.com/bitnami/charts/blob/redis/18.6.1/bitnami/redis/README.md
 redis:
-  enabled: true
-  architecture: standalone
-  auth:
-    enabled: false
-  master:
-    persistence:
-      enabled: true
-      size: 1Gi
-      storageClass: ocs-external-storagecluster-ceph-rbd
-    persistentVolumeClaimRetentionPolicy:
-      enabled: true
-      whenScaled: Retain
-      whenDeleted: Delete
-    podSecurityContext:
-      enabled: false
-    containerSecurityContext:
-      enabled: false
-
+  # subchart very outdated, so we use our own.
+  enabled: false

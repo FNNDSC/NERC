@@ -1,0 +1,18 @@
+# The postgres and redis subcharts of authentik are outdated, so we use our own.
+
+helmDefaults:
+  createNamespace: false
+
+releases:
+  - name: authentik-db
+    namespace: chris-3114b1
+    chart: oci://registry-1.docker.io/bitnamicharts/postgresql
+    version: "16.2.5"
+    values:
+      - ../authentik-postgresql.yaml
+  - name: authentik-valkey
+    namespace: chris-3114b1
+    chart: oci://registry-1.docker.io/bitnamicharts/valkey
+    version: "2.1.2"
+    values:
+      - ../authentik-valkey.yaml

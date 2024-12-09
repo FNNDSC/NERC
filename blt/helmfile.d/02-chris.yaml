@@ -1,0 +1,25 @@
+repositories:
+  - name: fnndsc
+    url: https://fnndsc.github.io/charts
+
+helmDefaults:
+  createNamespace: false
+
+releases:
+  - name: chris
+    namespace: chris-3114b1
+    chart: fnndsc/chris
+    version: "1.0.0-alpha.2"
+    values:
+      - ../chris-values.yaml
+      - cube:
+          secrets:
+            AUTH_LDAP_BIND_PASSWORD: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-ldapservice/bind-password" | quote }}
+
+  - name: chris-ui
+    namespace: chris-3114b1
+    chart: fnndsc/chris-ui
+    version: "1.0.0-alpha.2"
+    values:
+      - ../chris-ui-values.yaml
+
