@@ -1,0 +1,101 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+
+metadata:
+  labels:
+    blueprints.goauthentik.io/generated: 'true'
+    blueprints.goauthentik.io/description: A flow for supporting the "Create Recovery Link" feature. It presents a simple form to reset the user's password.
+  name: password reset
+
+context: {}
+entries:
+- attrs:
+    authentication: require_authenticated
+    denied_action: message_continue
+    designation: recovery
+    layout: stacked
+    name: recovery
+    policy_engine_mode: any
+    title: BLT Account Recovery
+  conditions: []
+  identifiers:
+    pk: 64cbad1b-0e1a-4b39-b8cf-ac33d938ffeb
+    slug: recovery
+  model: authentik_flows.flow
+  permissions: []
+  state: present
+- attrs:
+    field_key: password
+    label: Password
+    name: initial-setup-field-password
+    order: 300
+    placeholder: Password
+    required: true
+    type: password
+  conditions: []
+  identifiers:
+    pk: 265d1bf1-7334-4397-9f64-961b21897d75
+  model: authentik_stages_prompt.prompt
+  permissions: []
+  state: present
+- attrs:
+    field_key: password_repeat
+    label: Password (repeat)
+    name: initial-setup-field-password-repeat
+    order: 301
+    placeholder: Password (repeat)
+    required: true
+    type: password
+  conditions: []
+  identifiers:
+    pk: 2d0c1cd1-1b61-4912-b63c-84e3fbb3cde3
+  model: authentik_stages_prompt.prompt
+  permissions: []
+  state: present
+- attrs:
+    fields:
+    - 265d1bf1-7334-4397-9f64-961b21897d75
+    - 2d0c1cd1-1b61-4912-b63c-84e3fbb3cde3
+  conditions: []
+  identifiers:
+    name: intial-setup-password
+    pk: 177ff9b8-4f66-4196-9777-55b59a5d5f37
+  model: authentik_stages_prompt.promptstage
+  permissions: []
+  state: present
+- attrs:
+    user_creation_mode: never_create
+    user_type: external
+  conditions: []
+  identifiers:
+    name: default-password-change-write
+    pk: 1f9fea0c-d183-463f-be07-c0ac50a4b818
+  model: authentik_stages_user_write.userwritestage
+  permissions: []
+  state: present
+- attrs:
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+  conditions: []
+  identifiers:
+    order: 0
+    pk: f366d059-8d0d-458f-9c3b-1543935967b1
+    stage: 177ff9b8-4f66-4196-9777-55b59a5d5f37
+    target: 64cbad1b-0e1a-4b39-b8cf-ac33d938ffeb
+  model: authentik_flows.flowstagebinding
+  permissions: []
+  state: present
+- attrs:
+    invalid_response_action: retry
+    policy_engine_mode: any
+    re_evaluate_policies: true
+  conditions: []
+  identifiers:
+    order: 1
+    pk: 42a8d65f-8f69-4799-8cc8-79d7b9c6f9f8
+    stage: 1f9fea0c-d183-463f-be07-c0ac50a4b818
+    target: 64cbad1b-0e1a-4b39-b8cf-ac33d938ffeb
+  model: authentik_flows.flowstagebinding
+  permissions: []
+  state: present
+version: 1
