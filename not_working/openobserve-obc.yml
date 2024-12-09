@@ -1,7 +1,0 @@
-apiVersion: objectbucket.io/v1alpha1
-kind: ObjectBucketClaim
-metadata:
-  name: openobserve-storage
-spec:
-  generateBucketName: openobserve-storage
-  storageClassName: openshift-storage.noobaa.io
