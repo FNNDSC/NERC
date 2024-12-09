@@ -34,4 +34,43 @@ releases:
                 bucket_name: "blt-authentik-media"
                 access_key: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/nerc-openstack-ec2/access_key" | quote }}
                 secret_key: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/nerc-openstack-ec2/secret_key" | quote }}
-
+    jsonPatches:
+        # workaround for https://github.com/goauthentik/helm/issues/305
+        # patches the Role to remove unnecessary rules for traefik and apiextensions.k8s.io
+      - target:
+          version: v1
+          kind: Role
+          name: authentik
+        patch:
+          - op: replace
+            path: /rules
+            value:
+              - apiGroups:
+                  - ""
+                resources:
+                  - secrets
+                  - services
+                  - configmaps
+                verbs: &VERBS_RW
+                  - get
+                  - create
+                  - delete
+                  - list
+                  - patch
+              - apiGroups:
+                  - extensions
+                  - apps
+                resources:
+                  - deployments
+                verbs: *VERBS_RW
+              - apiGroups:
+                  - extensions
+                  - networking.k8s.io
+                resources:
+                  - ingresses
+                verbs: *VERBS_RW
+              - apiGroups:
+                  - monitoring.coreos.com
+                resources:
+                  - servicemonitors
+                verbs: *VERBS_RW
