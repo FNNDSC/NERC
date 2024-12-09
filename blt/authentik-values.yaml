@@ -1,6 +1,8 @@
 authentik:
   error_reporting:
-    enabled: false  # opt-out of anonymous usage data
+    # Opt-in to error and anonymous performance data reporting to sentry.io.
+    # Authentik is an honest open-source company, we're doing our part to help!
+    enabled: true
 
 server:
   resources:
@@ -31,10 +33,10 @@ serviceAccount:
 
 geoip:
   # -- enable GeoIP sidecars for the authentik server and worker pods
-  enabled: false  # temporarily disabling geoip updates because of rate limiting
+  enabled: true
   editionIds: "GeoLite2-City GeoLite2-ASN"
   # -- GeoIP update frequency, in hours
-  updateInterval: 24
+  updateInterval: 48
   ## use existing secret instead of values above
   existingSecret:
     # -- name of an existing secret to use instead of values above
