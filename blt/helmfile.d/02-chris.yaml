@@ -9,7 +9,7 @@ releases:
   - name: chris
     namespace: chris-3114b1
     chart: fnndsc/chris
-    version: "1.0.0-alpha.2"
+    version: "1.0.0-alpha.3"
     values:
       - ../chris-values.yaml
       - cube:

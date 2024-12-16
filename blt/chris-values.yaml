@@ -1,5 +1,4 @@
 global:
-  storageClass: 'ocs-external-storagecluster-ceph-rbd'
   defaultStorageClass: 'ocs-external-storagecluster-ceph-rbd'
 
   imagePullSecret:
