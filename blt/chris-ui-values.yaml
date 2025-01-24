@@ -1,5 +1,8 @@
+image:
+  tag: 4b813b0
+
 cubeUrl: https://cube.blt.chrisproject.org/api/v1/
-pfdcmUrl: http://localhost
+pfdcmUrl: https://chris-chris-pfdcm-chris-3114b1.apps.shift.nerc.mghpcc.org
 ackeeServer: https://ackee.chrisproject.org
 ackeeDomainId: 55bee671-bce5-46f7-93da-7b750ac34939
 
