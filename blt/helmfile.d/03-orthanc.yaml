@@ -1,0 +1,90 @@
+repositories:
+  - name: fnndsc
+    url: https://fnndsc.github.io/charts
+
+helmDefaults:
+  createNamespace: false
+  diffArgs: [ --dry-run=server ]
+
+releases:
+  - name: orthanc
+    chart: fnndsc/orthanc
+    version: 2.0.0-alpha.1
+    values:
+      - global:
+          imagePullSecrets:
+            - name: fnndscnercpull
+        config:
+          Name: Boston-London-Toronto
+          DeidentifyLogs: true
+          StorageCompression: true
+          AwsS3Storage:
+            StorageEncryption:
+              Enable: true
+              MasterKey: "auto"
+          DicomAet: BLT-ORTHANC
+          DicomModalities:
+            "BLT-ChRIS": [ "BLT-ChRIS", "chris-oxidicom", 11111 ]
+        resources:
+          requests: &REQUESTS
+            cpu: 1
+            memory: 4Gi
+          limits: *REQUESTS
+        crunchyPgo:
+          enabled: true
+          spec:
+            instances:
+              - dataVolumeClaimSpec:
+                  accessModes: [ ReadWriteOncePod ]
+                  resources:
+                    requests:
+                      storage: 1Gi
+                  storageClassName:
+                name: instance1
+                replicas: 1
+                resources:
+                  limits:
+                    cpu: 500m
+                    memory: 512Mi
+                  requests:
+                    cpu: 250m
+                    memory: 256Mi
+        objectStorage:
+          enabled: true
+          forceHttp: true
+        oauth2-proxy:
+          enabled: true
+          config:
+            existingSecret: authentik-orthanc-oauth2
+            configFile: |-
+              email_domains = [ "*" ]
+              upstreams = [ "http://orthanc:8042" ]
+              provider = "oidc"
+              provider_display_name = "BLT ChRIS Authentication"
+              oidc_issuer_url = "https://auth.blt.chrisproject.org/application/o/orthanc/"
+              redirect_url = "https://orthanc.blt.chrisproject.org/oauth2/callback"
+              reverse_proxy = true
+              skip_provider_button = true
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          ingress:
+            enabled: true
+            className: openshift-default
+            annotations:
+              cert-manager.io/issuer: letsencrypt
+              acme.cert-manager.io/http01-ingress-class: openshift-default
+            hosts: &HOSTS
+              - orthanc.blt.chrisproject.org
+            tls:
+              - secretName: orthanc-blt-chrisproject-org-letsencrypt
+                hosts: *HOSTS
+
+          # OpenShift security settings
+          securityContext:
+            runAsUser: ~
+            runAsGroup: ~

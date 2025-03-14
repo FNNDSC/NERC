@@ -2,6 +2,7 @@
 
 helmDefaults:
   createNamespace: false
+  diffArgs: [ --dry-run=server ]
 
 releases:
   - name: authentik-db
