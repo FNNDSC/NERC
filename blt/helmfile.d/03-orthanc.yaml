@@ -88,3 +88,6 @@ releases:
           securityContext:
             runAsUser: ~
             runAsGroup: ~
+
+  - name: orthanc-basic-auth-proxy
+    chart: ../orthanc-basic-auth-proxy

@@ -1,0 +1,50 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: basic-auth-proxy
+  annotations:
+    kubernetes.io/description: A reverse proxy adding HTTP basic auth to Orthanc.
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/target: "32"
+        autoscaling.knative.dev/max-scale: "3"
+    spec:
+      containers:
+        - image: quay.io/lib/haproxy:3.1.7-alpine
+          env:
+            - name: HAPROXY_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: orthanc-basic-auth-proxy
+                  key: user-password
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /readyz
+          volumeMounts:
+            - name: haproxy-cfg
+              mountPath: /usr/local/etc/haproxy
+          resources:
+            limits:
+              cpu: 1
+              memory: 4Gi
+            requests:
+              cpu: 1
+              memory: 4Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+      volumes:
+        - name: haproxy-cfg
+          configMap:
+            name: orthanc-basic-auth-proxy
+      enableServiceLinks: true
