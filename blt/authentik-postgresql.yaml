@@ -20,7 +20,7 @@ primary:
 backup:
   enabled: true
   cronjob:
-    schedule: "@hourly"  # TODO change me to @daily
+    schedule: "@daily"
     failedJobsHistoryLimit: 2
     successfulJobsHistoryLimit: 2
     resources:
@@ -31,6 +31,9 @@ backup:
     storage:
       enabled: true
       size: 8Gi
+    containerSecurityContext:
+      # disable manual security context on OpenShift
+      enabled: false
 
 serviceBindings:
   enabled: true
