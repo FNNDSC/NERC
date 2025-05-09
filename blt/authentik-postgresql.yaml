@@ -31,9 +31,10 @@ backup:
     storage:
       enabled: true
       size: 8Gi
+    podSecurityContext:
+      enabled: false  # must be disabled on OpenShift
     containerSecurityContext:
-      # disable manual security context on OpenShift
-      enabled: false
+      enabled: false  # must be disabled on OpenShift
 
 serviceBindings:
   enabled: true
