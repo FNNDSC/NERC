@@ -1,0 +1,126 @@
+repositories:
+  - name: fnndsc
+    url: https://fnndsc.github.io/charts
+
+helmDefaults:
+  createNamespace: false
+  diffArgs: [ --dry-run=server ]
+
+releases:
+  - name: orthanc2
+    chart: fnndsc/orthanc
+    version: 2.0.0
+    values:
+      - global:
+          imagePullSecrets:
+            - name: fnndscnercpull
+        image:
+          tag: 1.12.7
+        config:
+          Name: Boston-London-Toronto
+          DeidentifyLogs: true
+          StorageCompression: true
+          AwsS3Storage:
+            EnableAwsSdkLogs: true
+            Endpoint: "https://stack.nerc.mghpcc.org:13808"
+            Region: ""
+            BucketName: "blt-orthanc"
+            SecretKey: "${AWS_SECRET_ACCESS_KEY}"
+            AccessKey: "${AWS_ACCESS_KEY_ID}"
+            StorageEncryption:
+              Enable: true
+              MasterKey: "auto"
+            VirtualAddressing: false
+            UseTransferManager: false
+          # required for connection to NERC OpenStack Swift.
+          # See https://discourse.orthanc-server.org/t/http-4-pluginsmanager-cpp-153-aws-s3-storage-error-while-creating-object-response-code-1-curlcode-60-ssl-peer-certificate-or-ssh-remote-key-was-not-ok/4728/3?u=jennydaman
+          HttpsCACertificates: /etc/ssl/certs/ca-certificates.crt
+          DicomAet: BLT-ORTHANC
+          DicomModalities:
+            "BLT-ChRIS": [ "BLT-ChRIS", "chris-oxidicom", 11111 ]
+          OrthancExplorer2:
+            UiOptions:
+              EnableOpenInOhifViewer3: true
+              StudyListContentIfNoSearch: most-recents
+        extraEnv:
+          - name: AWS_EC2_METADATA_DISABLED
+            value: "true"
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: nerc-openstack-ec2
+                key: access_key
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: nerc-openstack-ec2
+                key: secret_key
+        resources:
+          requests: &REQUESTS
+            cpu: 1
+            memory: 4Gi
+          limits: *REQUESTS
+        crunchyPgo:
+          enabled: true
+          spec:
+            instances:
+              - dataVolumeClaimSpec:
+                  accessModes: [ ReadWriteOncePod ]
+                  resources:
+                    requests:
+                      storage: 8Gi
+                  storageClassName:
+                name: instance1
+                replicas: 1
+                resources:
+                  limits:
+                    cpu: 1
+                    memory: 4Gi
+                  requests:
+                    cpu: 1
+                    memory: 2Gi
+        objectStorage:
+          enabled: false  # we are using OpenStack Swift Storage, which is outside OpenShift
+        oauth2-proxy:
+          enabled: true
+          config:
+            existingSecret: authentik-orthanc-oauth2
+            configFile: |-
+              email_domains = [ "*" ]
+              upstreams = [ "http://orthanc2:8042" ]
+              provider = "oidc"
+              provider_display_name = "BLT ChRIS Authentication"
+              oidc_issuer_url = "https://auth.blt.chrisproject.org/application/o/orthanc/"
+              redirect_url = "https://orthanc.blt.chrisproject.org/oauth2/callback"
+              reverse_proxy = true
+              skip_provider_button = true
+
+              auth_logging = true
+              request_logging = false
+              silence_ping_logging = true
+          resources:
+            requests:
+              cpu: 1
+              memory: 2Gi
+            limits:
+              cpu: 1
+              memory: 4Gi
+          ingress:
+            enabled: true
+            className: openshift-default
+            annotations:
+              cert-manager.io/issuer: letsencrypt
+              acme.cert-manager.io/http01-ingress-class: openshift-default
+            hosts: &HOSTS
+              - orthanc.blt.chrisproject.org
+            tls:
+              - secretName: orthanc-blt-chrisproject-org-letsencrypt
+                hosts: *HOSTS
+
+          # OpenShift security settings
+          securityContext:
+            runAsUser: ~
+            runAsGroup: ~
+
+  - name: orthanc-basic-auth-proxy
+    chart: ../orthanc-basic-auth-proxy

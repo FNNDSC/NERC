@@ -7,6 +7,9 @@ helmDefaults:
   diffArgs: [ --dry-run=server ]
 
 releases:
+    # This instance is currently broken because NooBaa is broken.
+    # Support ticket: https://mghpcc.supportsystem.com/tickets.php?id=16908
+    # We are keeping it alive for troubleshooting.
   - name: orthanc
     chart: fnndsc/orthanc
     version: 2.0.0-alpha.1
@@ -19,6 +22,7 @@ releases:
           DeidentifyLogs: true
           StorageCompression: true
           AwsS3Storage:
+            EnableAwsSdkLogs: true  # TODO remove me
             StorageEncryption:
               Enable: true
               MasterKey: "auto"
@@ -53,45 +57,4 @@ releases:
           enabled: true
           forceHttp: true
         oauth2-proxy:
-          enabled: true
-          config:
-            existingSecret: authentik-orthanc-oauth2
-            configFile: |-
-              email_domains = [ "*" ]
-              upstreams = [ "http://orthanc:8042" ]
-              provider = "oidc"
-              provider_display_name = "BLT ChRIS Authentication"
-              oidc_issuer_url = "https://auth.blt.chrisproject.org/application/o/orthanc/"
-              redirect_url = "https://orthanc.blt.chrisproject.org/oauth2/callback"
-              reverse_proxy = true
-              skip_provider_button = true
-
-              auth_logging = true
-              request_logging = false
-              silence_ping_logging = true
-          resources:
-            requests:
-              cpu: 500m
-              memory: 1Gi
-            limits:
-              cpu: 500m
-              memory: 1Gi
-          ingress:
-            enabled: true
-            className: openshift-default
-            annotations:
-              cert-manager.io/issuer: letsencrypt
-              acme.cert-manager.io/http01-ingress-class: openshift-default
-            hosts: &HOSTS
-              - orthanc.blt.chrisproject.org
-            tls:
-              - secretName: orthanc-blt-chrisproject-org-letsencrypt
-                hosts: *HOSTS
-
-          # OpenShift security settings
-          securityContext:
-            runAsUser: ~
-            runAsGroup: ~
-
-  - name: orthanc-basic-auth-proxy
-    chart: ../orthanc-basic-auth-proxy
+          enabled: false
