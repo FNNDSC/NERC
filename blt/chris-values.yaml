@@ -184,7 +184,8 @@ pfcon:
     type: ClusterIP
     port: 5005
 
-  nodeSelector: {}
+  nodeSelector:
+    kubernetes.io/hostname: wrk-17
 
   # -- Storage space for CUBE files should be configured here.
   # -- It is recommended to allocate as much space as possible for CUBE files.
@@ -234,6 +235,7 @@ pfcon:
       ENABLE_HOME_WORKAROUND: "yes"
       REMOVE_JOBS: "yes"
       IGNORE_LIMITS: "no"
+      NODE_SELECTOR: "kubernetes.io/hostname=wrk-17"  # same as nodeSelector above
 
 # -- Configuration of PFDCM, the ChRIS PACS bridge
 pfdcm:
