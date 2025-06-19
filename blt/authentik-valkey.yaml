@@ -1,5 +1,7 @@
 global:
   defaultStorageClass: ocs-external-storagecluster-ceph-rbd
+  imagePullSecrets:
+    - name: fnndscnercpull
 
 auth:
   enabled: true
