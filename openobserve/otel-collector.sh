@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
 secret_json="$(oc get secret openobserve-user-otel-collector -o jsonpath='{.data}')"
-email="$(jq -r .email <<< "$secret_json" | base64 -d)"
-password="$(jq -r .password <<< "$secret_json" | base64 -d)"
+email="$(jaq -r .email <<< "$secret_json" | base64 -d)"
+password="$(jaq -r .password <<< "$secret_json" | base64 -d)"
 
 auth="$(echo "$email:$password" | base64)"
 

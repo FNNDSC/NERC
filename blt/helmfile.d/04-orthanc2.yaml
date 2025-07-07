@@ -80,6 +80,8 @@ releases:
                   requests:
                     cpu: 2
                     memory: 6Gi
+            # TODO backups
+            # backups:
         objectStorage:
           enabled: false  # we are using OpenStack Swift Storage, which is outside OpenShift
         oauth2-proxy:
@@ -125,3 +127,6 @@ releases:
 
   - name: orthanc-basic-auth-proxy
     chart: ../orthanc-basic-auth-proxy
+    # KNative Serving is not working on NERC-OCP, so we need to use a plain Deployment
+  - name: orthanc-basic-auth-proxy-again
+    chart: ../orthanc-basic-auth-proxy-again

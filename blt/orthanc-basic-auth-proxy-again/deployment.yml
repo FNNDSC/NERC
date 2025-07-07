@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: basic-auth-proxy-again
+  annotations:
+    kubernetes.io/description: A reverse proxy adding HTTP basic auth to Orthanc.
+spec:
+  template:
+    spec:
+      containers:
+        - name: haproxy
+          image: quay.io/lib/haproxy:3.1.7-alpine
+          env:
+            - name: HAPROXY_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: orthanc-basic-auth-proxy
+                  key: user-password
+          ports:
+            - containerPort: 8000
+          readinessProbe:
+            httpGet:
+              port: 8000
+              path: /readyz
+          volumeMounts:
+            - name: haproxy-cfg
+              mountPath: /usr/local/etc/haproxy
+          resources:
+            limits:
+              cpu: 1
+              memory: 4Gi
+            requests:
+              cpu: 1
+              memory: 4Gi
+      volumes:
+        - name: haproxy-cfg
+          configMap:
+            name: orthanc-basic-auth-proxy

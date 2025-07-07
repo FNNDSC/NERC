@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: basic-auth-proxy-again
+spec:
+  host: orthanc-basic-auth-proxy-again.apps.shift.nerc.mghpcc.org
+  path: /
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: orthanc-basic-auth-proxy-again

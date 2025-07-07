@@ -12,17 +12,20 @@ releases:
     # We are keeping it alive for troubleshooting.
   - name: orthanc
     chart: fnndsc/orthanc
-    version: 2.0.0-alpha.1
+    version: 2.0.0
     values:
       - global:
           imagePullSecrets:
             - name: fnndscnercpull
         config:
           Name: Boston-London-Toronto
-          DeidentifyLogs: true
-          StorageCompression: true
+          HttpsVerifyPeers: false  # TODO does this make NooBaa work?
+          HttpsCACertificates: ""
+          HttpVerbose: true
+          DeidentifyLogs: false
+          StorageCompression: false
           AwsS3Storage:
-            EnableAwsSdkLogs: true  # TODO remove me
+            EnableAwsSdkLogs: true
             StorageEncryption:
               Enable: true
               MasterKey: "auto"

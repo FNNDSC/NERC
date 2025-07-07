@@ -4,6 +4,7 @@
 global:
   # storage class to use for persistent volume claims
   storageClass: "ocs-external-storagecluster-ceph-rbd"
+  imagePullSecrets: [ fnndscnercpull ]
 
 # ChRIS automatic admin account
 #####################
@@ -101,6 +102,11 @@ cube:
 # [SUBCHART] PostgreSQL packaged by Bitnami
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters
 postgresql:
+
+  image:
+    # must manually set registry as docker.io, or else registry-1.docker.io
+    # will be used, and global.imagePullSecrets will not be matched.
+    registry: docker.io
 
   # no reason to change these values
   auth:

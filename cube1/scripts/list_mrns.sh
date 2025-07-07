@@ -8,12 +8,12 @@ if [ "$?" != '0' ]; then
   echo "error getting secret 'orthanc-user' from OpenShift. Are you logged in?"
   exit 1
 fi
-username="$(echo "$user_json" | jq -r .username | base64 -d)"
-password="$(echo "$user_json" | jq -r .password | base64 -d)"
+username="$(echo "$user_json" | jaq -r .username | base64 -d)"
+password="$(echo "$user_json" | jaq -r .password | base64 -d)"
 
 url="https://orthanc.chrisproject.org/patients"
 
 curl -sfu "$username:$password" "$url" \
-  | jq -r ".[]" \
+  | jaq -r ".[]" \
   | xargs -I '{}' curl -sfu "$username:$password" "$url/{}" \
-  | jq -r '.MainDicomTags.PatientID'
+  | jaq -r '.MainDicomTags.PatientID'

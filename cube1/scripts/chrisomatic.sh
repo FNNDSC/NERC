@@ -19,8 +19,8 @@ if [ "$?" != "0" ]; then
   exit 1
 fi
 
-username="$(echo "$secret_json" | jq -r .username | base64 -d)"
-password="$(echo "$secret_json" | jq -r .password | base64 -d)"
+username="$(echo "$secret_json" | jaq -r .username | base64 -d)"
+password="$(echo "$secret_json" | jaq -r .password | base64 -d)"
 
 # Should I use Podman or Docker?
 #################
