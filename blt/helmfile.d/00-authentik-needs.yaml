@@ -14,6 +14,6 @@ releases:
   - name: authentik-valkey
     namespace: chris-3114b1
     chart: oci://registry-1.docker.io/bitnamicharts/valkey
-    version: "2.1.2"
+    version: "3.0.27"
     values:
       - ../authentik-valkey.yaml

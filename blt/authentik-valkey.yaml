@@ -18,6 +18,9 @@ primary:
     enabled: true
     size: 4Gi
 
+pdb:
+  create: false
+
 serviceBindings:
   # Bugged. See https://github.com/bitnami/charts/issues/30842
   enabled: false
