@@ -1,0 +1,39 @@
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: "blt-orthanc" 
+  annotations:
+    kubernetes.io/description: "Installs the patient-list-ui into Orthanc."
+spec:
+  runPolicy: "Serial"
+  triggers: 
+    - type: "ConfigChange"
+  source: 
+    dockerfile: |
+      # syntax=docker/dockerfile:1.2
+      FROM jodogne/orthanc-plugins
+      ADD --chmod=644 https://github.com/FNNDSC/orthanc-patient-list/releases/download/release%2F20250805/libpatient_list_ui.so /usr/local/share/orthanc/custom_plugins/libFnndscPatientList.so
+  strategy:
+    dockerStrategy:
+      from:
+        kind: "DockerImage"
+        name: "docker.io/jodogne/orthanc-plugins:1.12.8"
+      pullSecret:
+        name: fnndscnercpull
+  output: 
+    to:
+      kind: "ImageStreamTag"
+      name: "orthanc:blt"
+  successfulBuildsHistoryLimit: 1
+  failedBuildsHistoryLimit: 2
+  completionDeadlineSeconds: 600
+
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: orthanc
+spec:
+  lookupPolicy:
+    local: true
+

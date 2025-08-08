@@ -11,11 +11,12 @@ releases:
     chart: fnndsc/orthanc
     version: 2.0.0
     values:
-      - global:
-          imagePullSecrets:
-            - name: fnndscnercpull
-        image:
-          tag: 1.12.7
+      - deploymentAnnotations:
+          image.openshift.io/triggers: >-
+            [{
+              "from": {"kind":"ImageStreamTag","name":"orthanc:blt"},
+              "fieldPath": "spec.template.spec.containers[?(@.name==\"orthanc\")].image"
+            }]
         config:
           Name: Boston-London-Toronto
           DeidentifyLogs: true
@@ -43,6 +44,38 @@ releases:
               EnableOpenInOhifViewer3: true
               StudyListContentIfNoSearch: most-recents
           HttpThreadsCount: 128
+
+          # -- List of paths to the plugins that are to be loaded into this
+          # -- instance of Orthanc (e.g. "./libPluginTest.so").
+          # -- These paths can refer to folders, in which case they will be
+          # -- scanned non-recursively to find shared libraries.
+          Plugins:
+            ## -------- Common Plugins --------
+            - /usr/local/share/orthanc/plugins/libConnectivityChecks.so
+            - /usr/local/share/orthanc/plugins/libHousekeeper.so
+            - /usr/local/share/orthanc/plugins/libModalityWorklists.so
+            - /usr/local/share/orthanc/plugins/libMultitenantDicom.so
+            - /usr/local/share/orthanc/plugins/libOrthancDicomWeb.so
+            - /usr/local/share/orthanc/plugins/libOrthancGdcm.so
+            - /usr/local/share/orthanc/plugins/libOrthancTransfers.so
+
+            ## -------- Storage and Database ---------
+            - /usr/local/share/orthanc/plugins/libOrthancPostgreSQLIndex.so
+            - /usr/local/share/orthanc/plugins/libOrthancAwsS3Storage.so
+
+            ## -------- Web user interfaces --------
+            - /usr/local/share/orthanc/plugins/libOrthancExplorer2.so
+            - /usr/local/share/orthanc/plugins/libOrthancOHIF.so
+            # - /usr/local/share/orthanc/plugins/libOrthancVolView.so
+            # - /usr/local/share/orthanc/plugins/libOrthancWebViewer.so
+            # - /usr/local/share/orthanc/plugins/libStoneWebViewer.so
+            # - /usr/local/share/orthanc/plugins/libRtViewerPlugin.so
+
+            ## -------- File Formats --------
+            - /usr/local/share/orthanc/plugins/libOrthancNeuro.so
+
+            ## -------- Custom Plugins -------
+            - /usr/local/share/orthanc/custom_plugins
         extraEnv:
           - name: AWS_EC2_METADATA_DISABLED
             value: "true"
@@ -82,6 +115,8 @@ releases:
                     memory: 6Gi
             # TODO backups
             # backups:
+        pgReady:
+          image: psql:16.3  # ImageStream
         objectStorage:
           enabled: false  # we are using OpenStack Swift Storage, which is outside OpenShift
         oauth2-proxy:
