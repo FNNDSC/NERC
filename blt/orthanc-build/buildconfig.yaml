@@ -12,14 +12,18 @@ spec:
     dockerfile: |
       # syntax=docker/dockerfile:1.2
       FROM jodogne/orthanc-plugins
-      ADD --chmod=644 https://github.com/FNNDSC/orthanc-patient-list/releases/download/release%2F20250805/libpatient_list_ui.so /usr/local/share/orthanc/custom_plugins/libFnndscPatientList.so
+      ARG RELEASE
+      ADD --chmod=644 https://github.com/FNNDSC/orthanc-patient-list/releases/download/release%2F${RELEASE}/libpatient_list_ui.so /usr/local/share/orthanc/custom_plugins/libFnndscPatientList.so
   strategy:
     dockerStrategy:
       from:
         kind: DockerImage
-        name: docker.io/jodogne/orthanc-plugins:1.12.8
+        name: docker.io/jodogne/orthanc-plugins:1.12.9
       pullSecret:
         name: fnndscnercpull
+      buildArgs:
+        - name: RELEASE
+          value: "20250812"
   output:
     to:
       kind: ImageStreamTag
