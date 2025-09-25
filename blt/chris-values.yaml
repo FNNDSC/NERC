@@ -286,17 +286,30 @@ pfdcm:
   # --
   # -- - "Deployment": use (standard) Kubernetes Deployment and Service APIs
   # -- - "Service": use the KNative Serving API
-  kind: Service
+  # NOTE: kind=Service does not work.
+  #       See https://mghpcc.supportsystem.com/tickets.php?id=13078
+  kind: Deployment
 
-  # KNative Serving configuration
-  #####################
-  # -- KNative Serving revision annotations.
-  # -- Only used with `pfdcm.kind=Service`
-  revisionAnnotations:
-    autoscaling.knative.dev/target: "4"
-    # autoscaling.knative.dev/min-scale: "1"
-    # autoscaling.knative.dev/max-scale: "3"
-    # autoscaling.knative.dev/scale-to-zero-pod-retention-period: "1m5s"
+  # -- OpenShift route.
+  # -- Only used with `pfdcm.kind=Deployment`
+  route:
+    enabled: true
+    host: pfdcm-chris-blt.apps.shift.nerc.mghpcc.org
+    tls:
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+      destinationCACertificate: ''
+
+  additionalConfig:
+    pacs:
+      services:
+        orthanc:
+          info:
+            aet: BLT-ChRIS
+            aet_listener: BLT-ChRIS
+            aec: BLT-ORTHANC
+            serverIP: orthanc2
+            serverPort: '4242'
 
   # -- DICOM listener for pfdcm. Enabled when pfdcm is enabled.
   listener:
