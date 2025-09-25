@@ -1,9 +1,6 @@
 global:
   defaultStorageClass: 'ocs-external-storagecluster-ceph-rbd'
 
-  imagePullSecrets:
-    - name: fnndscnercpull  # DockerHub login for increased rate-limit
-
 ingress:
   enabled: true
   className: openshift-default
@@ -132,6 +129,9 @@ cube:
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters
 postgresql:
   enabled: true
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: chris-3114b1/bitnami-postgresql
   auth:
     database: "chris"
     username: "chris"
@@ -152,6 +152,9 @@ postgresql:
 # [SUBCHART] RabbitMQ packaged by Bitnami
 # https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#parameters
 rabbitmq:
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: chris-3114b1/bitnami-rabbitmq
   resourcesPreset: medium
   persistence:
     enabled: true
@@ -163,6 +166,9 @@ rabbitmq:
 # -- progress messages sent from oxidicom to CUBE.
 # -- Documentation: https://github.com/bitnami/charts/tree/nats/8.4.3/bitnami/nats
 nats:
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: chris-3114b1/bitnami-nats
   resourcesPreset: small
   podLabels:
     app.kubernetes.io/part-of: chris
@@ -191,7 +197,7 @@ pfcon:
   # -- It is recommended to allocate as much space as possible for CUBE files.
   storage:
     existingClaim: ""
-    size: 32Gi
+    size: 64Gi
     accessModes: [ "ReadWriteOnce" ]
 
   pfcon:

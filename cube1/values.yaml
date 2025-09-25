@@ -1,13 +1,6 @@
 global:
   storageClass: "ocs-external-storagecluster-ceph-rbd"
 
-  imagePullSecrets: [ fnndscnercpull ]
-
-  # image registry for bitnami charts.
-  # For unknown reasons, if unspecified, registry-1.docker.io is used instead,
-  # which does not work with the specified global.imagePullSecrets.
-  imageRegistry: docker.io
-
 # ChRIS automatic admin account
 #####################
 
@@ -55,7 +48,7 @@ cube:
     # ref: https://docs.gunicorn.org/en/stable/settings.html
     GUNICORN_CMD_ARGS: "--workers=8 --timeout=3600"
     # smaller values increases responsiveness at the cost of resource usage and possibly concurrency bugs
-    CUBE_CELERY_POLL_INTERVAL: "5.0"
+    CUBE_CELERY_POLL_INTERVAL: "15.0"
     # HTTP server security settings
     DJANGO_ALLOWED_HOSTS: "*"  # note: * is okay if OpenShift router or k8s igress is validating host header
     DJANGO_CORS_ALLOW_ALL_ORIGINS: "false"
@@ -80,11 +73,11 @@ cube:
     ## Recommended value is x4 the size of the largest anticipated plugin instance output directory.
     resources:
       requests:
-        memory: 11444Mi
-        cpu: 3
+        memory: 4Gi
+        cpu: 1
       limits:
-        memory: 11444Mi
-        cpu: 3
+        memory: 4Gi
+        cpu: 1
 
   workerPeriodic:
     ## Resources for the periodic worker.
@@ -102,11 +95,11 @@ cube:
     ## Default values should be okay. About 256Mi of memory is needed per idle worker.
     resources:
       requests:
-        memory: 11Gi
-        cpu: 3
+        memory: 4Gi
+        cpu: 1
       limits:
-        memory: 11Gi
-        cpu: 3
+        memory: 4Gi
+        cpu: 1
 
 # Database
 #####################
@@ -114,6 +107,9 @@ cube:
 # [SUBCHART] PostgreSQL packaged by Bitnami
 # https://github.com/bitnami/charts/tree/main/bitnami/postgresql#parameters
 postgresql:
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: hosting-of-medical-image-analysis-platform-dcb83b/bitnami-postgresql
 
   # no reason to change these values
   auth:
@@ -128,10 +124,10 @@ postgresql:
     # Primary database instance resource requests
     resources:
       requests:
-        memory: 3814Mi
+        memory: 4Gi
         cpu: 1
       limits:
-        memory: 3814Mi
+        memory: 4Gi
         cpu: 1
 
     persistence:
@@ -151,6 +147,9 @@ postgresql:
 # [SUBCHART] RabbitMQ packaged by Bitnami
 # https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq#parameters
 rabbitmq:
+  image:
+    registry: image-registry.openshift-image-registry.svc:5000
+    repository: hosting-of-medical-image-analysis-platform-dcb83b/bitnami-rabbitmq
 
   # No reason to change these values.
   #
@@ -165,10 +164,10 @@ rabbitmq:
   resources:
     limits:
       cpu: 1
-      memory: 3814Mi
+      memory: 4Gi
     requests:
       cpu: 1
-      memory: 3814Mi
+      memory: 4Gi
 
   persistence:
     enabled: true
@@ -210,13 +209,13 @@ pfcon:
   pfcon:
     resources:
       limits:
-        cpu: 600m
-        memory: 2288Mi
+        cpu: 500m
+        memory: 2Gi
       requests:
-        cpu: 600m
-        memory: 2288Mi
+        cpu: 500m
+        memory: 2Gi
 
-    workers: 4
+    workers: 2
     workerTimeout: 3600
 
     # pfcon configuration
@@ -230,13 +229,13 @@ pfcon:
     # pman doesn't do anything besides sending and receiving HTTP requests.
     resources:
       limits:
-        cpu: 400m
+        cpu: 250m
         memory: 1Gi
       requests:
-        cpu: 400m
+        cpu: 250m
         memory: 1Gi
 
-    workers: 4
+    workers: 2
     workerTimeout: 30
 
     # pman configuration
@@ -278,10 +277,10 @@ pfdcm:
   resources:
     limits:
       cpu: 1
-      memory: 3814Mi
+      memory: 4Gi
     requests:
       cpu: 1
-      memory: 3814Mi
+      memory: 4Gi
 
   # DICOM Application Entity Title
   aet: "ChRIS"
@@ -300,12 +299,6 @@ pfdcm:
       type: ClusterIP
       port: 11113
     replicas: 1
-    ## manual configuration of OpenTelemetry
-    env:
-      - name: OTEL_RESOURCE_ATTRIBUTES
-        value: service.name=oxidicom
-      - name: OTEL_EXPORTER_OTLP_ENDPOINT
-        value: http://otel-collector-collector:4318
     config:
       ## number of times 
       httpRetries: 3
@@ -333,10 +326,10 @@ pfdcm:
       # with 16 threads, CPU usage peaks at 120m and memory usage peaks at 1.3 GiB
       limits:
         cpu: 500m
-        memory: 1907Mi
+        memory: 2Gi
       requests:
         cpu: 500m
-        memory: 1907Mi
+        memory: 2Gi
 
 # PACS server
 orthanc:
@@ -357,10 +350,10 @@ orthanc:
   resources:
     limits:
       cpu: 1
-      memory: 3814Mi
+      memory: 4Gi
     requests:
       cpu: 1
-      memory: 3814Mi
+      memory: 4Gi
   config:
     # The logical name of this instance of Orthanc. This one is
     # displayed in Orthanc Explorer and at the URI "/system".

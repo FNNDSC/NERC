@@ -1,7 +1,10 @@
 # https://artifacthub.io/packages/helm/bitnami/mongodb
 
 global:
-  imagePullSecrets: [ fnndscnercpull ]
+  imageRegistry: image-registry.openshift-image-registry.svc:5000
+
+image:
+  repository: hosting-of-medical-image-analysis-platform-dcb83b/bitnami-mongodb
 
 clusterDomain: cluster.local
 

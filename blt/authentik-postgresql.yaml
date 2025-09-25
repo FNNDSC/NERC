@@ -1,5 +1,11 @@
 global:
+  imageRegistry: image-registry.openshift-image-registry.svc:5000
+  security:
+    allowInsecureImages: true
   defaultStorageClass: ocs-external-storagecluster-ceph-rbd
+
+image:
+  repository: chris-3114b1/bitnami-postgresql
 
 architecture: standalone
 
