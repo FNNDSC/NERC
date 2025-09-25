@@ -302,8 +302,7 @@ pfdcm:
   listener:
     image:
       repository: ghcr.io/fnndsc/oxidicom
-      pullPolicy: Always
-      tag: "pr-3"  # pre-alpha, has known bugs.
+      tag: "3.1.0"
 
     replicas: 1
 
