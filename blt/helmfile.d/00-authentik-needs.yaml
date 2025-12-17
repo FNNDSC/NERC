@@ -11,9 +11,3 @@ releases:
     version: "16.7.27"
     values:
       - ../authentik-postgresql.yaml
-  - name: authentik-valkey
-    namespace: chris-3114b1
-    chart: oci://registry-1.docker.io/bitnamicharts/valkey
-    version: "3.0.31"
-    values:
-      - ../authentik-valkey.yaml

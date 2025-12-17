@@ -9,7 +9,7 @@ releases:
   - name: authentik
     namespace: chris-3114b1
     chart: authentik/authentik
-    version: "2025.6.4"
+    version: "2025.10.3"
     values:
       - ../authentik-values.yaml
       - authentik:
@@ -21,9 +21,6 @@ releases:
             user: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/username" | quote }}
             password: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/password" | quote }}
             port: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-db-postgresql-svcbind-custom-user/port" | quote }}
-          redis:
-            host: "authentik-valkey-primary"
-            password: {{ fetchSecretValue "ref+k8s://v1/Secret/chris-3114b1/authentik-valkey/valkey-password" | quote }}
           storage:
             media:
               backend: s3
