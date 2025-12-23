@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: haproxy
-          image: quay.io/lib/haproxy:3.2.5-alpine
+          image: haproxy:3.2.5-alpine
           env:
             - name: HAPROXY_USER_PASSWORD
               valueFrom:
