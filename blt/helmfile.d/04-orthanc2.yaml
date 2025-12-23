@@ -129,6 +129,7 @@ releases:
             existingSecret: authentik-orthanc-oauth2
             configFile: |-
               email_domains = [ "*" ]
+              insecure_oidc_allow_unverified_email = true
               upstreams = [ "http://orthanc2:8042" ]
               provider = "oidc"
               provider_display_name = "BLT ChRIS Authentication"
