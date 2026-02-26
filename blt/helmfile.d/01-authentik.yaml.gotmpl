@@ -9,7 +9,7 @@ releases:
   - name: authentik
     namespace: chris-3114b1
     chart: authentik/authentik
-    version: "2025.10.3"
+    version: 2026.2.0
     values:
       - ../authentik-values.yaml
       - authentik:
@@ -26,7 +26,7 @@ releases:
               backend: s3
               # N.B.: configuration of Authentik to use S3 (instead of filesystem)
               # for media storage conveniently works around a permission denied issue
-              # on the `/media` directory
+              # on the `/data/media` directory
               s3:
                 # NERC OpenStack Swift object storage
                 endpoint: "https://stack.nerc.mghpcc.org:13808"
