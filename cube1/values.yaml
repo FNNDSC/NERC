@@ -13,21 +13,7 @@ chris_admin:
 
 # Ingress and HTTPS
 ingress:
-  enabled: true
-  className: openshift-default
-  annotations:
-    cert-manager.io/issuer: letsencrypt
-    acme.cert-manager.io/http01-ingress-class: openshift-default
-  hosts:
-    - host: cube.chrisproject.org
-      paths:
-        - path: /
-          pathType: Prefix
-  tls:
-    - secretName: cube-chrisproject-org-letsencrypt
-      hosts:
-        - cube.chrisproject.org
-
+  enabled: false
 
 # ChRIS Backend
 #####################
@@ -255,7 +241,7 @@ pfcon:
 #####################
 
 pfdcm:
-  enabled: true
+  enabled: false
   image:
     repository: ghcr.io/fnndsc/pfdcm
     pullPolicy: IfNotPresent
@@ -333,7 +319,7 @@ pfdcm:
 
 # PACS server
 orthanc:
-  enabled: true
+  enabled: false
   imagePullSecrets:
     - name: fnndscnercpull
   podAnnotations: {}
@@ -429,12 +415,4 @@ orthanc:
     metricsEnabled: true
 
   ohif:
-    enabled: true
-
-  persistence:
-    storage:
-      size: 36Gi
-      accessModes: [ ReadWriteOnce ]
-    index:
-      size: 4Gi
-      accessModes: [ ReadWriteOnce ]
+    enabled: false

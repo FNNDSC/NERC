@@ -1,0 +1,18 @@
+repositories:
+  - name: fnndsc
+    url: https://fnndsc.github.io/charts
+
+helmDefaults:
+  createNamespace: false
+  diffArgs: [ --dry-run=server ]
+
+releases:
+  - name: cube1
+    namespace: hosting-of-medical-image-analysis-platform-dcb83b
+    chart: fnndsc/chris
+    version: "0.13.0"
+    values:
+      - ./values.yaml
+  - name: cube1-routes
+    namespace: hosting-of-medical-image-analysis-platform-dcb83b
+    chart: ./cube1-routes

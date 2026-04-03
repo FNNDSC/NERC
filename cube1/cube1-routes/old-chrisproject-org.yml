@@ -1,7 +1,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app-chrisproject-org
+  name: old-chrisproject-org
   labels:
     app.kubernetes.io/name: chrisui
     app.kubernetes.io/instance: cube1
@@ -14,16 +14,16 @@ spec:
   ingressClassName: openshift-default
   tls:
     - hosts:
-        - app.chrisproject.org
-      secretName: app-chrisproject-org-letsencrypt
+        - old.chrisproject.org
+      secretName: old-chrisproject-org-letsencrypt
   rules:
-    - host: app.chrisproject.org
+    - host: old.chrisproject.org
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: app-chrisproject-org
+                name: old-chrisproject-org
                 port:
                   number: 8080

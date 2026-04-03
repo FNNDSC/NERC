@@ -1,0 +1,20 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: cube1-server
+  labels:
+    app.kubernetes.io/component: backend
+    app.kubernetes.io/instance: cube1
+    app.kubernetes.io/name: cube1-server
+    app.kubernetes.io/part-of: chris
+spec:
+  to:
+    kind: Service
+    name: cube1-server
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+    destinationCACertificate: ''
+  host: cube1.apps.shift.nerc.mghpcc.org
+  port:
+    targetPort: http
